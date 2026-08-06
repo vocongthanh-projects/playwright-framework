@@ -1,40 +1,40 @@
 # Comparative quality audit
 
-Ba framework được chấm trên cùng rubric: reusable, không phụ thuộc ứng dụng, config hóa, lifecycle an toàn, dynamic locator/request, bảo mật evidence, runner độc lập, test contract, dependency pinning và CI tái tạo được.
+All three frameworks are evaluated against the same rubric: reusability, application independence, configuration, safe lifecycle management, dynamic locators and requests, evidence security, runner independence, contract tests, dependency pinning, and reproducible CI.
 
 | Framework | Score | Verification evidence |
 |---|---:|---|
-| API | 10/10 | 5 module, 28 executed verification tests |
-| Appium | 10/10 | 3 module, 21 executed verification tests + 1 abstract runner entry point |
-| Playwright | 10/10 | 3 module, 29 executed verification tests + 1 abstract runner entry point |
+| API | 10/10 | 5 modules and 28 executed verification tests |
+| Appium | 10/10 | 3 modules, 21 executed verification tests, and 1 abstract runner entry point |
+| Playwright | 10/10 | 3 modules, 29 executed verification tests, and 1 abstract runner entry point |
 
 ## API
 
-- Request model và transport adapter tách rời; retry chỉ chạy với idempotent request.
-- Service URL, timeout, retry và environment được validate fail-fast; absolute request path và URI chứa credential bị từ chối.
-- JSON, form text, bearer token, error và trace đều đi qua redaction.
-- Fixture ledger cleanup theo LIFO, vẫn cleanup phần còn lại khi một resource lỗi.
-- Starter chỉ minh họa consumer boundary, không đưa endpoint/credential sản phẩm vào framework.
-- Multipart upload và binary download là transport-neutral; trace không chứa file content hoặc filename.
+- Request models and transport adapters are separated; retry runs only for idempotent requests.
+- Service URLs, timeouts, retry policy, and environment are validated fail-fast; absolute request paths and credential-bearing URIs are rejected.
+- JSON, form text, bearer tokens, errors, and traces all pass through redaction.
+- The fixture ledger cleans up in LIFO order and continues after an individual resource cleanup failure.
+- The starter demonstrates the consumer boundary without embedding product endpoints or credentials in the framework.
+- Multipart uploads and binary downloads are transport-neutral; traces contain neither file content nor file names.
 
 ## Appium
 
-- Core, TestNG và Cucumber-TestNG tách module; không còn screen, step, feature, locator hay test data của ứng dụng cụ thể.
-- `MobileLocator` dùng logical name cùng ordered fallback riêng Android/iOS; action không log dữ liệu được nhập.
-- Config nhiều tầng và validator kiểm tra endpoint, app ID, timeout, reset policy, port trước khi tạo session.
-- Evidence gồm screenshot và XML đã redact; XML parser chặn DOCTYPE, external entity và XInclude.
-- Appium 3 cùng Android/iOS driver được pin. CI tái tạo bằng `npm ci`, audit dependency và kiểm tra driver registry.
-- Device matrix thay thế runner/hook nhân bản và chặn UDID/port collision trước session creation.
+- Core, TestNG, and Cucumber-TestNG are separate modules with no application-specific screens, steps, features, locators, or test data.
+- `MobileLocator` uses a logical name with separate ordered Android and iOS fallbacks; actions never log entered values.
+- Layered configuration and validation check endpoints, application identifiers, timeouts, reset policies, and ports before session creation.
+- Evidence includes screenshots and redacted XML; the XML parser blocks DOCTYPE declarations, external entities, and XInclude.
+- Appium 3 and Android/iOS drivers are pinned. CI uses `npm ci`, audits dependencies, and checks the driver registry.
+- The device matrix replaces duplicated runners and hooks and rejects UDID and port collisions before session creation.
 
 ## Playwright
 
-- Core, TestNG và Cucumber-TestNG tách module, dependency chỉ hướng xuống core.
-- Logical locator có ordered fallback và component scope; role/label/test-id là first-class strategy.
-- Browser context cô lập theo test/scenario, matrix target và device profile do consumer cấu hình.
-- Screenshot mask dữ liệu nhạy cảm; HTML và trace tuân theo evidence policy.
-- Unit/adapter contracts cộng với browser contract thật kiểm tra fallback, scope, fill và click.
-- Browser contract thật còn kiểm tra upload, download, dialog và popup theo event-safe API.
+- Core, TestNG, and Cucumber-TestNG are separate modules with dependencies pointing only toward core.
+- Logical locators provide ordered fallbacks and component scope; role, label, and test ID are first-class strategies.
+- Each test or scenario has an isolated browser context; consumers configure matrix targets and device profiles.
+- Screenshots mask sensitive data, while HTML and traces follow the evidence policy.
+- Unit and adapter contracts plus a real browser contract verify fallback, scope, fill, and click behavior.
+- The real browser contract also verifies upload, download, dialog, and popup behavior through event-safe APIs.
 
-“10/10” nghĩa là cả ba đạt đầy đủ acceptance rubric đã công bố và verification gate hiện tại; không có nghĩa dependency sẽ không cần tiếp tục được cập nhật trong tương lai.
+“10/10” means all three frameworks satisfy the published acceptance rubric and current verification gate. It does not mean their dependencies will never require future updates.
 
-`@Test` trên abstract Cucumber runner là entry point dành cho consumer subclass, không phải verification test do reactor tự chạy. CI của cả ba repository dùng GitLab CI với cùng policy: merge request và nhánh `main`.
+The `@Test` annotation on each abstract Cucumber runner is an entry point for consumer subclasses, not a verification test executed by the reactor. All three repositories use GitLab CI with the same merge-request and `main` branch policy.

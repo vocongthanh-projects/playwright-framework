@@ -1,21 +1,21 @@
 # Playwright Automation Framework
 
-Framework web automation dùng chung cho nhiều dự án. Source chỉ chứa automation infrastructure; URL, selector, page, steps, credential và test data thuộc repository của ứng dụng sử dụng framework.
+A reusable web automation framework for multiple projects. The source contains only automation infrastructure; URLs, selectors, pages, steps, credentials, and test data belong to the consuming application repository.
 
 ## Modules
 
 ```text
 playwright-framework/
-├── framework-core/                 # Playwright, locator, lifecycle, config, evidence
-├── framework-testng/               # TestNG thuần, không phụ thuộc Cucumber
-└── framework-cucumber-testng/      # Cucumber world, hooks và browser matrix runner
+├── framework-core/                 # Playwright, locators, lifecycle, configuration, evidence
+├── framework-testng/               # plain TestNG, independent of Cucumber
+└── framework-cucumber-testng/      # Cucumber world, hooks, and browser matrix runner
 ```
 
-Dependency chỉ đi một chiều từ adapter xuống core. `framework-core` không phụ thuộc Cucumber hoặc TestNG ở runtime.
+Dependencies flow only from adapters down to core. `framework-core` has no runtime dependency on Cucumber or TestNG.
 
-## Dynamic locator
+## Dynamic locators
 
-Consumer định nghĩa logical locator và fallback theo thứ tự ổn định:
+Consumers define logical locators and fallbacks in a stable order:
 
 ```java
 private static final WebLocator EMAIL = WebLocator.of(
@@ -31,22 +31,22 @@ private static final WebLocator SAVE = WebLocator.of(
 );
 ```
 
-Page hoặc step chỉ gọi action bằng logical locator:
+Pages and steps call actions using logical locators:
 
 ```java
 actions.fill(EMAIL, email);
 actions.click(SAVE);
 ```
 
-Framework thử candidate theo đúng thứ tự, dùng web-first wait và báo logical name cùng các strategy đã thử. Log không ghi giá trị được fill. Với password/token:
+The framework evaluates candidates in declaration order, uses web-first waits, and reports the logical name and attempted strategies. Logs never contain filled values. Use the sensitive variant for passwords and tokens:
 
 ```java
 actions.fillSensitive(PASSWORD, password);
 ```
 
-Không có cơ chế tự đoán XPath từ text. Role, label và test ID được ưu tiên; CSS/XPath là fallback minh bạch do consumer quyết định.
+There is no mechanism that guesses XPath from text. Role, label, and test ID are preferred; CSS and XPath are transparent consumer-defined fallbacks.
 
-Component scope ngăn locator bắt nhầm element ở khu vực khác:
+Component scope prevents a locator from matching an element in an unrelated region:
 
 ```java
 ElementActions dialog = actions.within(ACCOUNT_DIALOG);
@@ -54,7 +54,7 @@ dialog.fill(EMAIL, email);
 dialog.click(SAVE);
 ```
 
-File và browser event vẫn dùng logical locator:
+Files and browser events also use logical locators:
 
 ```java
 actions.upload(IMPORT_FILE, Path.of("employees.xlsx"));
@@ -63,9 +63,9 @@ BrowserEvents.DialogResult dialog = events.acceptNextDialog(() -> actions.click(
 Page popup = events.popup(() -> actions.click(OPEN_DETAILS));
 ```
 
-Event listener luôn được đăng ký trước action trigger. Download destination được normalize; upload fail-fast nếu file không tồn tại.
+Event listeners are always registered before the trigger action. Download destinations are normalized, and uploads fail fast when the file does not exist.
 
-## Dùng với TestNG
+## TestNG usage
 
 ```xml
 <dependency>
@@ -86,9 +86,9 @@ public final class AccountTest extends BaseWebTest {
 }
 ```
 
-Mỗi method có `WebTestContext` riêng. `@AfterMethod(alwaysRun = true)` luôn đóng browser và publish đường dẫn evidence vào `ITestResult`.
+Every method gets a separate `WebTestContext`. `@AfterMethod(alwaysRun = true)` always closes the browser and publishes evidence paths to `ITestResult`.
 
-## Dùng với Cucumber + TestNG
+## Cucumber and TestNG usage
 
 ```xml
 <dependency>
@@ -108,11 +108,11 @@ public final class RunCucumberTest extends AbstractMatrixCucumberTest {
 }
 ```
 
-Steps inject `CucumberWorld` bằng constructor. Generic hooks tự quản lý browser và evidence; project ứng dụng không cần copy lifecycle code.
+Steps inject `CucumberWorld` through their constructors. Generic hooks manage the browser and evidence lifecycle, so application projects do not copy lifecycle code.
 
 ## Application configuration
 
-Tạo `src/test/resources/config/application.properties` ở consumer:
+Create `src/test/resources/config/application.properties` in the consumer:
 
 ```properties
 navigation.enabled=true
@@ -129,34 +129,34 @@ device.qa-phone.touch=true
 device.qa-phone.user-agent=Your test user agent
 ```
 
-Tên device được chuẩn hóa thành prefix, nên framework không hardcode danh sách thiết bị. `QA Phone` tương ứng `device.qa-phone.*`.
+Device names are normalized into property prefixes; the framework does not hard-code a device catalog. `QA Phone` maps to `device.qa-phone.*`.
 
-Thứ tự cấu hình:
+Configuration precedence:
 
 ```text
 JVM system property
   → environment variable
   → config.file / CONFIG_FILE
-  → config/application.properties của consumer
+  → consumer config/application.properties
   → config/framework.properties
 ```
 
-Framework hỗ trợ viewport, locale, timezone, permissions, geolocation, custom browser executable, storage state có TTL, video và browser matrix qua config.
+The framework supports viewport, locale, timezone, permissions, geolocation, custom browser executables, expiring storage state, video, and a configurable browser matrix.
 
-## Evidence và security
+## Evidence and security
 
-Khi test fail:
+When a test fails:
 
-- screenshot tự mask password và `[data-sensitive='true']`;
-- HTML được tạo từ DOM clone và thay nội dung nhạy cảm bằng `<redacted>`;
-- trace được lưu trong `target/evidence` nếu bật;
-- Cucumber mặc định attach screenshot và HTML, không attach trace ZIP để tránh làm report chứa quá nhiều dữ liệu nhạy cảm.
+- screenshots mask passwords and `[data-sensitive='true']` elements;
+- HTML is produced from a DOM clone with sensitive content replaced by `<redacted>`;
+- traces are stored under `target/evidence` when enabled;
+- Cucumber attaches screenshots and HTML by default, but does not attach trace ZIP files to avoid placing excessive sensitive data in reports.
 
-Consumer có thể mở rộng `evidence.mask-selector` cho UI riêng. Artifact và storage state nằm dưới `target`, không được commit.
+Consumers can extend `evidence.mask-selector` for application-specific UI. Artifacts and storage state live under `target` and must not be committed.
 
 ## Verification
 
-Unit và contract tests:
+Unit and contract tests:
 
 ```bash
 ./mvnw clean verify
@@ -168,6 +168,6 @@ Browser integration contract:
 ./mvnw -Pbrowser-contract clean verify
 ```
 
-CI chạy profile `browser-contract` trong Playwright image đã pin cùng version. Integration test thật xác nhận logical locator fallback, component scope, fill và click trên Chromium.
+CI runs the `browser-contract` profile in a Playwright image pinned to the same version. The real integration test verifies logical locator fallback, component scope, fill, click, upload, download, dialog, and popup behavior on Chromium.
 
-Xem [kiến trúc](docs/ARCHITECTURE.md) và [đánh giá chất lượng](docs/QUALITY_AUDIT.md).
+See [architecture](docs/ARCHITECTURE.md) and the [quality audit](docs/QUALITY_AUDIT.md).

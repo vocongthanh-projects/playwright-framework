@@ -12,19 +12,19 @@ application tests
                            Playwright Java
 ```
 
-Core sở hữu automation mechanics. Consumer sở hữu application behavior.
+Core owns automation mechanics. Consumers own application behavior.
 
 | Framework owns | Application owns |
 |---|---|
-| layered config và validation | URL theo môi trường |
-| browser/context/page lifecycle | page/component objects |
-| logical locator contract và resolver | logical locator definitions |
-| browser/device matrix | feature, steps và test data |
-| storage-state policy | login flow và credentials |
-| trace, screenshot, redacted HTML, video | business assertions |
-| TestNG/Cucumber adapters | tags và suite policy |
+| layered configuration and validation | environment-specific URLs |
+| browser, context, and page lifecycle | page and component objects |
+| logical locator contract and resolver | logical locator definitions |
+| browser and device matrix | features, steps, and test data |
+| storage-state policy | login flows and credentials |
+| traces, screenshots, redacted HTML, and video | business assertions |
+| TestNG and Cucumber adapters | tags and suite policy |
 
-Không thêm selector, tọa độ, nội dung UI, tài khoản hoặc step mang tên sản phẩm vào framework.
+Never add product selectors, coordinates, UI content, accounts, or named product steps to the framework.
 
 ## Locator pipeline
 
@@ -34,17 +34,17 @@ logical locator
   → optional component scope
   → per-candidate web-first visibility probe
   → resolved Playwright Locator
-  → action/assertion
+  → action or assertion
 ```
 
-Supported strategies: role, label, test ID, placeholder, alt text, title, text, CSS và XPath. Consumer quyết định fallback order; resolver không tự sinh selector hoặc retry action có side effect.
+Supported strategies include role, label, test ID, placeholder, alt text, title, text, CSS, and XPath. Consumers choose fallback order; the resolver neither generates selectors nor retries actions with side effects.
 
-Playwright đã có actionability checks và auto-wait. Framework chỉ retry việc resolve candidate; không tự click lại vì có thể gửi form hoặc tạo dữ liệu hai lần.
+Playwright already provides actionability checks and auto-waiting. The framework retries only candidate resolution; it does not automatically click twice because doing so could submit a form or create duplicate data.
 
 ## Execution lifecycle
 
 ```text
-resolve config and target
+resolve configuration and target
   → fail-fast validation
   → launch browser
   → build isolated context options
@@ -54,26 +54,26 @@ resolve config and target
   → execute test behavior
   → capture masked evidence on failure
   → persist storage state (optional)
-  → close context, browser and Playwright
+  → close context, browser, and Playwright
 ```
 
-Mỗi test/scenario có một `WebTestContext`. Mutable `Page` và `BrowserContext` không được chia sẻ giữa worker. Target Cucumber chỉ tồn tại trong `ThreadLocal` trong thời gian scenario chạy và luôn được clear trong `finally`.
+Every test or scenario has one `WebTestContext`. Mutable `Page` and `BrowserContext` objects are never shared between workers. A Cucumber target exists in `ThreadLocal` only while its scenario runs and is always cleared in `finally`.
 
 ## Failure and security policy
 
-- Config sai dừng trước browser launch.
-- Evidence được lấy khi page còn sống; resource đóng trong `finally`.
-- Capture screenshot và HTML độc lập, nên lỗi một artifact không làm mất artifact còn lại.
-- Action logs chỉ chứa logical locator name và strategy, không chứa field value.
-- Screenshot dùng mask selector; page source được redacted trên DOM clone.
-- Trace có thể chứa dữ liệu nhạy cảm nên mặc định không attach vào Cucumber report.
-- Tên artifact được sanitize trước khi tạo filesystem path.
+- Invalid configuration stops execution before browser launch.
+- Evidence is captured while the page is alive; resources close in `finally`.
+- Screenshot and HTML capture are independent, so one artifact failure does not suppress the other artifact.
+- Action logs contain only logical locator names and strategies, never field values.
+- Screenshots use mask selectors; page source is redacted on a DOM clone.
+- Traces may contain sensitive data and are not attached to Cucumber reports by default.
+- Artifact names are sanitized before filesystem paths are created.
 
 ## Extension points
 
-- Consumer triển khai `LocatorDefinition` trực tiếp hoặc dùng `WebLocator`.
-- Page kế thừa `BasePage`; component có root scope kế thừa `BaseComponent`.
-- Project không dùng BDD chọn `framework-testng`.
-- Project dùng BDD chọn `framework-cucumber-testng` và inject `CucumberWorld`.
-- Reporting vendor có thể đọc `EvidenceBundle` từ TestNG result hoặc Cucumber attachment mà không thay core.
-- `BrowserEvents` quản lý download, popup và dialog theo đúng register-before-trigger contract; file input vẫn đi qua logical locator.
+- Consumers implement `LocatorDefinition` directly or use `WebLocator`.
+- Pages extend `BasePage`; components with a root scope extend `BaseComponent`.
+- Non-BDD projects choose `framework-testng`.
+- BDD projects choose `framework-cucumber-testng` and inject `CucumberWorld`.
+- Reporting integrations can read `EvidenceBundle` from TestNG results or Cucumber attachments without modifying core.
+- `BrowserEvents` manages downloads, popups, and dialogs under the register-before-trigger contract; file input still uses a logical locator.
