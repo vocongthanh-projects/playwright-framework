@@ -222,4 +222,50 @@ CI chạy profile `browser-contract` trên image Playwright pin đúng version. 
 - Push tag `vX.Y.Z` → bump tất cả module lên version release đó và deploy lên GitLab Maven registry.
 - Push lên `develop` → deploy version `-SNAPSHOT` hiện tại (Maven cho phép ghi đè SNAPSHOT, khác version release).
 
+## So sánh kiến trúc với `playwright-framework-typescript`
+
+Cả 2 framework theo đúng cùng 1 kiến trúc 3 lớp: **consumer sở hữu app** → **framework nội bộ
+(`vn.ots.qc`/`@ots`) sở hữu cơ chế dùng chung** → **thư viện bên thứ 3 làm việc nặng** (điều
+khiển browser thật). Java "dày" hơn ở lớp giữa vì Playwright Java **không đi kèm test runner/
+fixture** như Playwright Node — nhiều class ở đây tồn tại chỉ để bù lại thứ mà `@playwright/test`
+(TS) đã có sẵn natively.
+
+| Nhóm | Java (`vn.ots.qc.web.*`) | Vai trò | TS (`@ots/playwright-core-ts`) |
+|---|---|---|---|
+| **Page** | `page.BasePage` | Base cho page object của consumer | `base-page.ts` — `BasePage` |
+| | `page.BaseComponent` | Base cho component, giữ locator con trong scope gốc | — (TS chain `Locator` con trực tiếp) |
+| **Locator** | `locator.WebLocators` | Factory tạo locator theo semantic | `locators.ts` — `role/label/text/testId/css` |
+| | `locator.WebLocator` | Locator logic bất biến, có fallback candidate | `locators.ts` — `dynamicLocator` |
+| | `locator.LocatorResolver` | Resolve candidate theo thứ tự | — (`Locator.or()` gốc của Playwright) |
+| | `locator.LocatorStrategy` | Interface 1 chiến lược locate | `locators.ts` — type `LocatorStrategy` |
+| | `locator.LocatorCandidate` | 1 cách cụ thể để locate 1 phần tử | — (gộp vào `LocatorStrategy`) |
+| | `locator.LocatorDefinition` | Contract locator logic do app định nghĩa | — (dùng function trực tiếp, không cần interface) |
+| | `locator.ResolvedLocator` | Locator đã resolve + tên chiến lược | — (`Locator.describe()` có sẵn) |
+| | `locator.LocatorResolutionException` | Lỗi khi không resolve được | — (Playwright tự throw timeout error) |
+| **Browser/session** | `browser.BrowserFactory` | Launch browser theo config | — (`playwright.config.ts` + `projects`) |
+| | `browser.BrowserContextOptionsFactory` | Build context options từ config | — (`use: {...}` trong config) |
+| | `browser.BrowserSession` | Sở hữu resource Playwright theo scenario | — (fixture `page`/`context` tự quản lý) |
+| | `browser.BrowserTarget`, `ExecutionTarget` | Target browser cho adapter song song | — (`projects` trong config) |
+| | `browser.BrowserTargetMatrix` | Resolve ma trận browser/device | — (`projects` + `devices`) |
+| | `browser.DeviceProfile` | Device profile custom | — (`devices['...']` có sẵn) |
+| **Config** | `config.FrameworkConfig` | Config layered, bất biến | — (`process.env`/`dotenv` qua `config`/`config-local`) |
+| | `config.FrameworkConfigValidator` | Validate config trước khi launch | **gap thật** — TS chưa có |
+| | `config.ConfigurationException` | Lỗi config | — (dùng `Error` thường) |
+| **Context/lifecycle** | `context.WebTestContext` | Composition root theo từng test | — (fixture `test`/`page`) |
+| | `testng.BaseWebTest` | Lifecycle TestNG | `fixtures.ts` — `test`/`expect` |
+| | `testng.TestArtifactReporter` | Publish đường dẫn artifact | — (`@playwright/test` tự có reporter) |
+| **Interaction** | `interaction.ElementActions` | Action web-first, không log giá trị | — (gọi thẳng `.fill()`/`.click()` trên `Locator`) |
+| | `interaction.BrowserEvents` | Đăng ký event trước khi trigger | — (`page.waitForEvent()` gốc) |
+| **Evidence** | `artifact.ArtifactPaths` | Sinh đường dẫn artifact an toàn | — (`@playwright/test` tự đặt tên file) |
+| | `artifact.EvidenceCollector` | Thu evidence, che field nhạy cảm | — (`screenshot: 'only-on-failure'` có sẵn) |
+| | `artifact.EvidenceBundle` | Gói evidence trả về | — (report HTML tự gộp) |
+| | `artifact.TraceRecorder` | Quản lý trace theo context | — (`trace: 'on-first-retry'` có sẵn) |
+| **Auth** | `auth.StorageStateManager` | Load/lưu storage state, có hạn dùng | **gap thật** — TS có `storageState` option nhưng chưa có cơ chế hạn dùng |
+| **Cucumber** | `cucumber.*` (3 class) | Runner + hook + world cho BDD | **gap thật** — TS chưa có adapter BDD tương đương |
+
+Phần lớn cột TS là "—" không phải vì framework Java làm thừa, mà vì Node/Playwright Test đã cho
+sẵn cơ chế đó (fixture lifecycle, browser launch, trace/evidence, reporter) ở tầng ngôn ngữ — Java
+phải tự viết để đạt cùng mức năng lực. 3 dòng đánh dấu **gap thật** là chỗ TS thực sự còn thiếu so
+với Java.
+
 Xem thêm [architecture](docs/ARCHITECTURE.md).
