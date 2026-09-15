@@ -15,7 +15,9 @@ Dependencies flow only from adapters down to core. `framework-core` has no runti
 
 ## Installing (consumer projects)
 
-Published on the GitLab Maven Package Registry — add the repository and dependency to your consumer project's `pom.xml`:
+Published on the GitLab Maven Package Registry — this is a **private** registry, so resolving
+dependencies needs auth too, not just deploying. Add the repository to your consumer project's
+`pom.xml`:
 
 ```xml
 <repositories>
@@ -34,6 +36,28 @@ Published on the GitLab Maven Package Registry — add the repository and depend
     </dependency>
     <!-- or framework-cucumber-testng for BDD -->
 </dependencies>
+```
+
+Then add the matching server credentials to your **local** `~/.m2/settings.xml` (a personal
+access token, scope `read_api` is enough — do not reuse a `write_repository`/`api`-scoped
+token for this):
+
+```xml
+<settings>
+  <servers>
+    <server>
+      <id>gitlab-maven</id>
+      <configuration>
+        <httpHeaders>
+          <property>
+            <name>Private-Token</name>
+            <value>your-personal-access-token</value>
+          </property>
+        </httpHeaders>
+      </configuration>
+    </server>
+  </servers>
+</settings>
 ```
 
 ## Dynamic locators
