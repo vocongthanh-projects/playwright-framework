@@ -1,23 +1,22 @@
 # Playwright Automation Framework (Java)
 
-A reusable web automation framework for multiple projects. The source contains only automation infrastructure; URLs, selectors, pages, steps, credentials, and test data belong to the consuming application repository.
+Framework automation web có thể tái sử dụng cho nhiều dự án. Source chỉ chứa hạ tầng automation; URL, selector, page, step, credential, và test data thuộc về repo ứng dụng tiêu dùng.
 
-## Modules
+## Module
 
 ```text
 playwright-framework-java/
-├── framework-core/                 # Playwright, locators, lifecycle, configuration, evidence
-├── framework-testng/               # plain TestNG, independent of Cucumber
-└── framework-cucumber-testng/      # Cucumber world, hooks, and browser matrix runner
+├── framework-core/                 # Playwright, locator, lifecycle, cấu hình, evidence
+├── framework-testng/               # TestNG thuần, độc lập với Cucumber
+└── framework-cucumber-testng/      # Cucumber world, hooks, và browser matrix runner
 ```
 
-Dependencies flow only from adapters down to core. `framework-core` has no runtime dependency on Cucumber or TestNG.
+Dependency chỉ chảy từ adapter xuống core. `framework-core` không có runtime dependency nào tới Cucumber hay TestNG.
 
-## Installing (consumer projects)
+## Cài đặt (dự án consumer)
 
-Published on the GitLab Maven Package Registry — this is a **private** registry, so resolving
-dependencies needs auth too, not just deploying. Add the repository to your consumer project's
-`pom.xml`:
+Publish trên GitLab Maven Package Registry — đây là registry **private**, nên resolve
+dependency cũng cần auth, không chỉ deploy. Thêm repository vào `pom.xml` của dự án consumer:
 
 ```xml
 <repositories>
@@ -34,13 +33,13 @@ dependencies needs auth too, not just deploying. Add the repository to your cons
         <version>1.0.0-SNAPSHOT</version>
         <scope>test</scope>
     </dependency>
-    <!-- or framework-cucumber-testng for BDD -->
+    <!-- hoặc framework-cucumber-testng cho BDD -->
 </dependencies>
 ```
 
-Then add the matching server credentials to your **local** `~/.m2/settings.xml` (a personal
-access token, scope `read_api` is enough — do not reuse a `write_repository`/`api`-scoped
-token for this):
+Sau đó thêm credential tương ứng vào `~/.m2/settings.xml` **local** của bạn (personal access
+token, scope `read_api` là đủ — đừng dùng lại token có scope `write_repository`/`api` cho việc
+này):
 
 ```xml
 <settings>
@@ -60,26 +59,26 @@ token for this):
 </settings>
 ```
 
-### Consumer project structure
+### Cấu trúc dự án consumer
 
-The framework ships no pages, steps, or features — that's the consumer's own layout, following
-standard Maven test conventions:
+Framework không đóng gói sẵn page, step, hay feature nào — đó là layout riêng của consumer, theo
+đúng convention test chuẩn của Maven:
 
 ```text
 your-app-repo/
 ├── src/test/java/com/yourcompany/
-│   ├── pages/              # page objects, extend BasePage
-│   └── tests/               # TestNG tests, extend BaseWebTest
+│   ├── pages/              # page object, extend BasePage
+│   └── tests/               # TestNG test, extend BaseWebTest
 ├── src/test/resources/
 │   ├── config/
 │   │   └── application.properties   # BASE_URL, browser targets, device profiles
-│   └── features/            # *.feature, if using framework-cucumber-testng
+│   └── features/            # *.feature, nếu dùng framework-cucumber-testng
 └── pom.xml
 ```
 
-## Dynamic locators
+## Locator động (dynamic locator)
 
-Consumers define logical locators and fallbacks in a stable order:
+Consumer định nghĩa locator logic và các phương án dự phòng theo thứ tự cố định:
 
 ```java
 private static final WebLocator EMAIL = WebLocator.of(
@@ -95,22 +94,22 @@ private static final WebLocator SAVE = WebLocator.of(
 );
 ```
 
-Pages and steps call actions using logical locators:
+Page và step gọi action bằng locator logic:
 
 ```java
 actions.fill(EMAIL, email);
 actions.click(SAVE);
 ```
 
-The framework evaluates candidates in declaration order, uses web-first waits, and reports the logical name and attempted strategies. Logs never contain filled values. Use the sensitive variant for passwords and tokens:
+Framework đánh giá các candidate theo đúng thứ tự khai báo, dùng web-first wait, và báo lại tên logic cùng các chiến lược đã thử. Log không bao giờ chứa giá trị đã điền. Dùng biến thể sensitive cho mật khẩu và token:
 
 ```java
 actions.fillSensitive(PASSWORD, password);
 ```
 
-There is no mechanism that guesses XPath from text. Role, label, and test ID are preferred; CSS and XPath are transparent consumer-defined fallbacks.
+Không có cơ chế nào tự đoán XPath từ text. Role, label, và test ID được ưu tiên; CSS và XPath là fallback minh bạch do consumer tự định nghĩa.
 
-Component scope prevents a locator from matching an element in an unrelated region:
+Component scope ngăn 1 locator match nhầm phần tử ở vùng không liên quan:
 
 ```java
 ElementActions dialog = actions.within(ACCOUNT_DIALOG);
@@ -118,7 +117,7 @@ dialog.fill(EMAIL, email);
 dialog.click(SAVE);
 ```
 
-Files and browser events also use logical locators:
+File và browser event cũng dùng locator logic:
 
 ```java
 actions.upload(IMPORT_FILE, Path.of("employees.xlsx"));
@@ -127,9 +126,9 @@ BrowserEvents.DialogResult dialog = events.acceptNextDialog(() -> actions.click(
 Page popup = events.popup(() -> actions.click(OPEN_DETAILS));
 ```
 
-Event listeners are always registered before the trigger action. Download destinations are normalized, and uploads fail fast when the file does not exist.
+Event listener luôn được đăng ký trước action kích hoạt. Đường dẫn download được chuẩn hóa, và upload fail nhanh nếu file không tồn tại.
 
-## TestNG usage
+## Dùng với TestNG
 
 ```java
 public final class AccountTest extends BaseWebTest {
@@ -141,9 +140,9 @@ public final class AccountTest extends BaseWebTest {
 }
 ```
 
-Every method gets a separate `WebTestContext`. `@AfterMethod(alwaysRun = true)` always closes the browser and publishes evidence paths to `ITestResult`.
+Mỗi method có 1 `WebTestContext` riêng. `@AfterMethod(alwaysRun = true)` luôn đóng browser và publish đường dẫn evidence vào `ITestResult`.
 
-## Cucumber and TestNG usage
+## Dùng với Cucumber và TestNG
 
 ```java
 @CucumberOptions(
@@ -154,11 +153,11 @@ public final class RunCucumberTest extends AbstractMatrixCucumberTest {
 }
 ```
 
-Steps inject `CucumberWorld` through their constructors. Generic hooks manage the browser and evidence lifecycle, so application projects do not copy lifecycle code.
+Step inject `CucumberWorld` qua constructor. Hook chung quản lý lifecycle browser và evidence, nên dự án ứng dụng không phải copy code lifecycle.
 
-## Application configuration
+## Cấu hình ứng dụng
 
-Create `src/test/resources/config/application.properties` in the consumer:
+Tạo `src/test/resources/config/application.properties` bên consumer:
 
 ```properties
 navigation.enabled=true
@@ -175,9 +174,9 @@ device.qa-phone.touch=true
 device.qa-phone.user-agent=Your test user agent
 ```
 
-Device names are normalized into property prefixes; the framework does not hard-code a device catalog. `QA Phone` maps to `device.qa-phone.*`.
+Tên device được chuẩn hóa thành tiền tố property; framework không hard-code catalog device nào. `QA Phone` map thành `device.qa-phone.*`.
 
-Configuration precedence:
+Thứ tự ưu tiên cấu hình:
 
 ```text
 JVM system property
@@ -187,40 +186,40 @@ JVM system property
   → config/framework.properties
 ```
 
-The framework supports viewport, locale, timezone, permissions, geolocation, custom browser executables, expiring storage state, video, and a configurable browser matrix.
+Framework hỗ trợ viewport, locale, timezone, permission, geolocation, browser executable tùy chỉnh, storage state có hạn dùng, video, và browser matrix cấu hình được.
 
-## Evidence and security
+## Evidence và bảo mật
 
-When a test fails:
+Khi 1 test fail:
 
-- screenshots mask passwords and `[data-sensitive='true']` elements;
-- HTML is produced from a DOM clone with sensitive content replaced by `<redacted>`;
-- traces are stored under `target/evidence` when enabled;
-- Cucumber attaches screenshots and HTML by default, but does not attach trace ZIP files to avoid placing excessive sensitive data in reports.
+- screenshot che mật khẩu và các phần tử `[data-sensitive='true']`;
+- HTML được tạo từ DOM clone với nội dung nhạy cảm thay bằng `<redacted>`;
+- trace được lưu dưới `target/evidence` khi bật;
+- Cucumber đính kèm screenshot và HTML mặc định, nhưng không đính kèm file trace ZIP để tránh đưa quá nhiều dữ liệu nhạy cảm vào report.
 
-Consumers can extend `evidence.mask-selector` for application-specific UI. Artifacts and storage state live under `target` and must not be committed.
+Consumer có thể mở rộng `evidence.mask-selector` cho UI riêng của ứng dụng. Artifact và storage state nằm dưới `target` và không được commit.
 
-## Verification
+## Kiểm thử (verification)
 
-Unit and contract tests:
+Unit test và contract test:
 
 ```bash
 ./mvnw clean verify
 ```
 
-Browser integration contract:
+Contract tích hợp browser thật:
 
 ```bash
 ./mvnw -Pbrowser-contract clean verify
 ```
 
-CI runs the `browser-contract` profile in a Playwright image pinned to the same version. The real integration test verifies logical locator fallback, component scope, fill, click, upload, download, dialog, and popup behavior on Chromium.
+CI chạy profile `browser-contract` trên image Playwright pin đúng version. Integration test thật verify locator fallback, component scope, fill, click, upload, download, dialog, và popup behavior trên Chromium.
 
 ## Publishing
 
-`.gitlab-ci.yml` has a `deploy` stage mirroring the `api-framework`/`playwright-framework-typescript` pattern:
+`.gitlab-ci.yml` có `deploy` stage theo đúng pattern `api-framework`/`playwright-framework-typescript`:
 
-- Push a `vX.Y.Z` tag → bumps every module to that release version and deploys to the GitLab Maven registry.
-- Push to `develop` → deploys the current `-SNAPSHOT` version (Maven allows overwriting SNAPSHOTs, unlike release versions).
+- Push tag `vX.Y.Z` → bump tất cả module lên version release đó và deploy lên GitLab Maven registry.
+- Push lên `develop` → deploy version `-SNAPSHOT` hiện tại (Maven cho phép ghi đè SNAPSHOT, khác version release).
 
-See [architecture](docs/ARCHITECTURE.md).
+Xem thêm [architecture](docs/ARCHITECTURE.md).
