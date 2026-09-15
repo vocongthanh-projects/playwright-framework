@@ -1,92 +1,185 @@
-# UI HRM
+# Playwright Automation Framework (Java)
 
+A reusable web automation framework for multiple projects. The source contains only automation infrastructure; URLs, selectors, pages, steps, credentials, and test data belong to the consuming application repository.
 
+## Modules
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin http://10.0.0.40/qc-quality-control/ui-hrm.git
-git branch -M develop
-git push -uf origin develop
+```text
+playwright-framework-java/
+├── framework-core/                 # Playwright, locators, lifecycle, configuration, evidence
+├── framework-testng/               # plain TestNG, independent of Cucumber
+└── framework-cucumber-testng/      # Cucumber world, hooks, and browser matrix runner
 ```
 
-## Integrate with your tools
+Dependencies flow only from adapters down to core. `framework-core` has no runtime dependency on Cucumber or TestNG.
 
-- [ ] [Set up project integrations](http://10.0.0.40/qc-quality-control/ui-hrm/-/settings/integrations)
+## Installing (consumer projects)
 
-## Collaborate with your team
+Published on the GitLab Maven Package Registry — add the repository and dependency to your consumer project's `pom.xml`:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```xml
+<repositories>
+    <repository>
+        <id>gitlab-maven</id>
+        <url>http://10.0.0.40/api/v4/groups/qc-quality-control/-/packages/maven</url>
+    </repository>
+</repositories>
 
-## Test and Deploy
+<dependencies>
+    <dependency>
+        <groupId>vn.ots.qc</groupId>
+        <artifactId>framework-testng</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <scope>test</scope>
+    </dependency>
+    <!-- or framework-cucumber-testng for BDD -->
+</dependencies>
+```
 
-Use the built-in continuous integration in GitLab.
+## Dynamic locators
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Consumers define logical locators and fallbacks in a stable order:
 
-***
+```java
+private static final WebLocator EMAIL = WebLocator.of(
+    "account.email",
+    WebLocators.testId("account-email"),
+    WebLocators.label("Email"),
+    WebLocators.css("input[name='email']")
+);
 
-# Editing this README
+private static final WebLocator SAVE = WebLocator.of(
+    "account.save",
+    WebLocators.role(AriaRole.BUTTON, "Save")
+);
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Pages and steps call actions using logical locators:
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```java
+actions.fill(EMAIL, email);
+actions.click(SAVE);
+```
 
-## Name
-Choose a self-explaining name for your project.
+The framework evaluates candidates in declaration order, uses web-first waits, and reports the logical name and attempted strategies. Logs never contain filled values. Use the sensitive variant for passwords and tokens:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```java
+actions.fillSensitive(PASSWORD, password);
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+There is no mechanism that guesses XPath from text. Role, label, and test ID are preferred; CSS and XPath are transparent consumer-defined fallbacks.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Component scope prevents a locator from matching an element in an unrelated region:
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```java
+ElementActions dialog = actions.within(ACCOUNT_DIALOG);
+dialog.fill(EMAIL, email);
+dialog.click(SAVE);
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Files and browser events also use logical locators:
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```java
+actions.upload(IMPORT_FILE, Path.of("employees.xlsx"));
+Path file = events.downloadTo(() -> actions.click(EXPORT), Path.of("target/downloads/export.xlsx"));
+BrowserEvents.DialogResult dialog = events.acceptNextDialog(() -> actions.click(DELETE));
+Page popup = events.popup(() -> actions.click(OPEN_DETAILS));
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Event listeners are always registered before the trigger action. Download destinations are normalized, and uploads fail fast when the file does not exist.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## TestNG usage
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+```java
+public final class AccountTest extends BaseWebTest {
+    @Test(dataProvider = "browserTargets")
+    public void savesAccount(BrowserTarget target) {
+        actions().fill(EMAIL, "qa@example.test");
+        actions().click(SAVE);
+    }
+}
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Every method gets a separate `WebTestContext`. `@AfterMethod(alwaysRun = true)` always closes the browser and publishes evidence paths to `ITestResult`.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Cucumber and TestNG usage
 
-## License
-For open source projects, say how it is licensed.
+```java
+@CucumberOptions(
+    features = "src/test/resources/features",
+    glue = {"com.yourcompany.tests", "vn.ots.qc.web.cucumber"}
+)
+public final class RunCucumberTest extends AbstractMatrixCucumberTest {
+}
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Steps inject `CucumberWorld` through their constructors. Generic hooks manage the browser and evidence lifecycle, so application projects do not copy lifecycle code.
+
+## Application configuration
+
+Create `src/test/resources/config/application.properties` in the consumer:
+
+```properties
+navigation.enabled=true
+navigation.base-url=https://your-application.example
+
+browser.targets=chromium,firefox,webkit@qa-phone
+browser.headless=true
+
+device.qa-phone.viewport.width=390
+device.qa-phone.viewport.height=844
+device.qa-phone.scale-factor=3
+device.qa-phone.mobile=true
+device.qa-phone.touch=true
+device.qa-phone.user-agent=Your test user agent
+```
+
+Device names are normalized into property prefixes; the framework does not hard-code a device catalog. `QA Phone` maps to `device.qa-phone.*`.
+
+Configuration precedence:
+
+```text
+JVM system property
+  → environment variable
+  → config.file / CONFIG_FILE
+  → consumer config/application.properties
+  → config/framework.properties
+```
+
+The framework supports viewport, locale, timezone, permissions, geolocation, custom browser executables, expiring storage state, video, and a configurable browser matrix.
+
+## Evidence and security
+
+When a test fails:
+
+- screenshots mask passwords and `[data-sensitive='true']` elements;
+- HTML is produced from a DOM clone with sensitive content replaced by `<redacted>`;
+- traces are stored under `target/evidence` when enabled;
+- Cucumber attaches screenshots and HTML by default, but does not attach trace ZIP files to avoid placing excessive sensitive data in reports.
+
+Consumers can extend `evidence.mask-selector` for application-specific UI. Artifacts and storage state live under `target` and must not be committed.
+
+## Verification
+
+Unit and contract tests:
+
+```bash
+./mvnw clean verify
+```
+
+Browser integration contract:
+
+```bash
+./mvnw -Pbrowser-contract clean verify
+```
+
+CI runs the `browser-contract` profile in a Playwright image pinned to the same version. The real integration test verifies logical locator fallback, component scope, fill, click, upload, download, dialog, and popup behavior on Chromium.
+
+## Publishing
+
+`.gitlab-ci.yml` has a `deploy` stage mirroring the `api-framework`/`playwright-framework-typescript` pattern:
+
+- Push a `vX.Y.Z` tag → bumps every module to that release version and deploys to the GitLab Maven registry.
+- Push to `develop` → deploys the current `-SNAPSHOT` version (Maven allows overwriting SNAPSHOTs, unlike release versions).
+
+See [architecture](docs/ARCHITECTURE.md).
