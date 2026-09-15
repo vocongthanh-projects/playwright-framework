@@ -60,6 +60,23 @@ token for this):
 </settings>
 ```
 
+### Consumer project structure
+
+The framework ships no pages, steps, or features — that's the consumer's own layout, following
+standard Maven test conventions:
+
+```text
+your-app-repo/
+├── src/test/java/com/yourcompany/
+│   ├── pages/              # page objects, extend BasePage
+│   └── tests/               # TestNG tests, extend BaseWebTest
+├── src/test/resources/
+│   ├── config/
+│   │   └── application.properties   # BASE_URL, browser targets, device profiles
+│   └── features/            # *.feature, if using framework-cucumber-testng
+└── pom.xml
+```
+
 ## Dynamic locators
 
 Consumers define logical locators and fallbacks in a stable order:
