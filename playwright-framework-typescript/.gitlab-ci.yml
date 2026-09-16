@@ -1,0 +1,51 @@
+stages:
+  - test
+  - deploy
+
+variables:
+  CI: "true"
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules
+
+test:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.63.0-noble
+  script:
+    - npm ci
+    - npm run typecheck
+    - npm run lint
+    - npm run build
+    - npm test
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - playwright-report/
+      - test-results/
+
+# npm registry versions are immutable, unlike Maven SNAPSHOTs — so `develop` pushes publish a
+# `-dev.<sha>` prerelease under the `next` dist-tag (opt-in), while a `vX.Y.Z` tag publishes the
+# real release under the default `latest` dist-tag. Consumers pin an exact tagged version.
+deploy:
+  stage: deploy
+  image: node:22
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - npm ci
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        RELEASE_VERSION="${CI_COMMIT_TAG#v}"
+        npm version "$RELEASE_VERSION" --no-git-tag-version --allow-same-version
+        npm publish
+      else
+        DEV_VERSION="$(node -p "require('./package.json').version")-dev.${CI_COMMIT_SHORT_SHA}"
+        npm version "$DEV_VERSION" --no-git-tag-version --allow-same-version
+        npm publish --tag next
+      fi

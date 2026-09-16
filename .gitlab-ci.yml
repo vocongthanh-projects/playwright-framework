@@ -17,24 +17,49 @@ variables:
 cache:
   key:
     files:
-      - pom.xml
-      - framework-core/pom.xml
-      - framework-cucumber-testng/pom.xml
-      - .mvn/wrapper/maven-wrapper.properties
+      - playwright-framework-java/pom.xml
+      - playwright-framework-java/framework-core/pom.xml
+      - playwright-framework-java/framework-cucumber-testng/pom.xml
+      - playwright-framework-java/.mvn/wrapper/maven-wrapper.properties
   paths:
     - .m2/repository
 
 verify:
   stage: test
   script:
+    - cd playwright-framework-java
     - ./mvnw --batch-mode -Pbrowser-contract clean verify
   artifacts:
     expire_in: 7 days
     paths:
-      - framework-core/target/framework-core-*.jar
-      - framework-core/target/surefire-reports/
-      - framework-core/target/failsafe-reports/
-      - framework-testng/target/framework-testng-*.jar
-      - framework-testng/target/surefire-reports/
-      - framework-cucumber-testng/target/framework-cucumber-testng-*.jar
-      - framework-cucumber-testng/target/surefire-reports/
+      - playwright-framework-java/framework-core/target/framework-core-*.jar
+      - playwright-framework-java/framework-core/target/surefire-reports/
+      - playwright-framework-java/framework-core/target/failsafe-reports/
+      - playwright-framework-java/framework-testng/target/framework-testng-*.jar
+      - playwright-framework-java/framework-testng/target/surefire-reports/
+      - playwright-framework-java/framework-cucumber-testng/target/framework-cucumber-testng-*.jar
+      - playwright-framework-java/framework-cucumber-testng/target/surefire-reports/
+
+typescript:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.63.0-noble
+  variables:
+    CI: "true"
+  cache:
+    key:
+      files:
+        - playwright-framework-typescript/package-lock.json
+    paths:
+      - playwright-framework-typescript/node_modules
+  script:
+    - cd playwright-framework-typescript
+    - npm ci
+    - npm run typecheck
+    - npm run lint
+    - npm test
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - playwright-framework-typescript/playwright-report/
+      - playwright-framework-typescript/test-results/

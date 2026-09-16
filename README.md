@@ -6,10 +6,15 @@ A reusable web automation framework for multiple projects. The source contains o
 
 ```text
 playwright-framework/
-├── framework-core/                 # Playwright, locators, lifecycle, configuration, evidence
-├── framework-testng/               # plain TestNG, independent of Cucumber
-└── framework-cucumber-testng/      # Cucumber world, hooks, and browser matrix runner
+├── playwright-framework-java/          # Java + Maven framework (this document)
+│   ├── framework-core/                 # Playwright, locators, lifecycle, configuration, evidence
+│   ├── framework-testng/               # plain TestNG, independent of Cucumber
+│   └── framework-cucumber-testng/      # Cucumber world, hooks, and browser matrix runner
+└── playwright-framework-typescript/    # Playwright + TypeScript framework, independent stack
 ```
+
+The two stacks are kept in separate top-level folders and never share code or dependencies —
+see [`docs/JAVA_VS_TYPESCRIPT.md`](docs/JAVA_VS_TYPESCRIPT.md) for a syntax comparison.
 
 Dependencies flow only from adapters down to core. `framework-core` has no runtime dependency on Cucumber or TestNG.
 
@@ -110,6 +115,29 @@ public final class RunCucumberTest extends AbstractMatrixCucumberTest {
 
 Steps inject `CucumberWorld` through their constructors. Generic hooks manage the browser and evidence lifecycle, so application projects do not copy lifecycle code.
 
+## TypeScript usage
+
+The TypeScript sibling (`playwright-framework-typescript/`) follows the same split — see its
+own [README](playwright-framework-typescript/README.md) for full usage. Quick version:
+
+```bash
+npm install @ots/playwright-core-ts
+```
+
+```typescript
+import { test, expect, BasePage, role, testId } from '@ots/playwright-core-ts';
+
+class LoginPage extends BasePage {
+  readonly email = testId('email')(this.page);
+  readonly submit = role('button', { name: 'Sign in' })(this.page);
+}
+
+test('signs in', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.goto('/login');
+});
+```
+
 ## Application configuration
 
 Create `src/test/resources/config/application.properties` in the consumer:
@@ -156,16 +184,18 @@ Consumers can extend `evidence.mask-selector` for application-specific UI. Artif
 
 ## Verification
 
+Run from the `playwright-framework-java/` directory:
+
 Unit and contract tests:
 
 ```bash
-./mvnw clean verify
+cd playwright-framework-java && ./mvnw clean verify
 ```
 
 Browser integration contract:
 
 ```bash
-./mvnw -Pbrowser-contract clean verify
+cd playwright-framework-java && ./mvnw -Pbrowser-contract clean verify
 ```
 
 CI runs the `browser-contract` profile in a Playwright image pinned to the same version. The real integration test verifies logical locator fallback, component scope, fill, click, upload, download, dialog, and popup behavior on Chromium.

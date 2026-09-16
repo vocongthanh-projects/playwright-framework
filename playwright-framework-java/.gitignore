@@ -1,0 +1,27 @@
+# Compiled output
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# Local configuration and secrets
+**/config/local.properties
+.auth/
+.env
+.env.*
+
+# Reports and temporary files
+test-output/
+allure-results/
+allure-report/
+cucumber-reports/
+playwright-report/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
