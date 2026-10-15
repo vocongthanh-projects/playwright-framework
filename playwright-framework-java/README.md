@@ -15,8 +15,10 @@ Dependency chỉ chảy từ adapter xuống core. `framework-core` không có r
 
 ## Cài đặt (dự án consumer)
 
-Repo này không publish lên Maven Central hay registry công khai nào. Cách dùng nhanh nhất là
-clone và install vào local Maven repository của bạn:
+Artifacts không publish lên Maven Central. Dự án mới nên bắt đầu từ
+[`template-consumer-java`](../template-consumer-java/README.md), template độc lập dùng các artifact
+trong GitLab Maven Package Registry. Nếu cần thử framework trực tiếp từ source, clone và install
+reactor vào local Maven repository:
 
 ```bash
 git clone https://github.com/vocongthanh247/playwright-framework.git
@@ -35,6 +37,11 @@ Sau đó thêm dependency vào `pom.xml` của dự án consumer:
 </dependency>
 <!-- hoặc framework-cucumber-testng cho BDD -->
 ```
+
+Với Registry, dùng project-scoped Maven repository, server ID `playwright-framework-registry`,
+và job-token allowlist như hướng dẫn trong template. Project ID được truyền qua
+`PLAYWRIGHT_FRAMEWORK_PROJECT_ID`; không ghi token vào POM. Local install ở trên dành cho phát
+triển framework hoặc khi chưa cấu hình quyền đọc Registry.
 
 ### Cấu trúc dự án consumer
 

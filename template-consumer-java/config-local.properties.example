@@ -1,0 +1,12 @@
+# Copy to config-local.properties (gitignored) for personal overrides.
+# Set only after choosing a real target application and test account.
+navigation.enabled=true
+navigation.base-url=https://replace-me-with-app-url.example
+browser.targets=chromium
+browser.headless=false
+
+# Optional persisted browser authentication state. Treat the file as a secret.
+# storage-state.enabled=true
+# storage-state.path=target/state/storage.json
+# storage-state.ttl-minutes=60
+# storage-state.persist=true

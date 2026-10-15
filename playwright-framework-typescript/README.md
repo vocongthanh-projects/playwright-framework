@@ -32,8 +32,12 @@ năng tái sử dụng, y hệt việc `framework-core` (Java) mà mọc ra 1 pa
 
 ## Cài đặt (dự án consumer)
 
-Package này không publish lên npm registry công khai nào. Cách dùng nhanh nhất là clone và build
-từ source:
+Package này không publish lên npm registry công khai. Với dự án consumer, dùng
+[`template-consumer-typescript`](../template-consumer-typescript/README.md), cấu hình `.npmrc` cho
+GitLab Package Registry nội bộ và cài version đã publish. Template giải thích domain/project ID,
+token, lockfile, browser binaries và CI.
+
+Khi phát triển framework, có thể clone và build source local:
 
 ```bash
 git clone https://github.com/vocongthanh247/playwright-framework.git
@@ -43,7 +47,8 @@ npm run build
 ```
 
 Rồi tham chiếu package qua đường dẫn local (`npm install ../playwright-framework/playwright-framework-typescript`
-hoặc `npm link`) từ dự án consumer.
+hoặc `npm link`) để thử thay đổi framework trước khi publish. Đây là đường phát triển local, không
+phải quy trình khởi tạo consumer dùng chung.
 
 `@playwright/test` là peer dependency — cài nó ở dự án consumer luôn (thường đã có sẵn, vì đó là
 test runner của bạn).

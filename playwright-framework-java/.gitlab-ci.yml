@@ -4,7 +4,7 @@ workflow:
     - if: '$CI_COMMIT_BRANCH == "develop"'
     - if: '$CI_COMMIT_TAG'
 
-image: mcr.microsoft.com/playwright/java:v1.61.0-noble
+image: mcr.microsoft.com/playwright/java:v1.63.0-noble
 
 stages:
   - test

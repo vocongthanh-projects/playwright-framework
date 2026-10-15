@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>vn.ots.qc.consumer.template</groupId>
+    <artifactId>playwright-consumer-tests</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>Playwright Java Consumer Test Template</name>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <playwright.framework.version>1.0.0-SNAPSHOT</playwright.framework.version>
+        <testng.version>7.12.0</testng.version>
+        <compiler.version>3.15.0</compiler.version>
+        <surefire.version>3.5.6</surefire.version>
+        <playwright.browser.install>chromium</playwright.browser.install>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>vn.ots.qc</groupId>
+            <artifactId>framework-testng</artifactId>
+            <version>${playwright.framework.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>gitlab-registry</id>
+            <activation>
+                <property><name>playwright.framework.repository.url</name></property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>playwright-framework-registry</id>
+                    <url>${playwright.framework.repository.url}</url>
+                </repository>
+            </repositories>
+        </profile>
+        <profile>
+            <id>install-browsers</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>install-playwright-browsers</id>
+                                <phase>generate-test-resources</phase>
+                                <goals><goal>java</goal></goals>
+                                <configuration>
+                                    <mainClass>com.microsoft.playwright.CLI</mainClass>
+                                    <classpathScope>test</classpathScope>
+                                    <arguments>
+                                        <argument>install</argument>
+                                        <argument>${playwright.browser.install}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler.version}</version>
+                <configuration><release>${maven.compiler.release}</release><parameters>true</parameters></configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration><failIfNoTests>true</failIfNoTests></configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

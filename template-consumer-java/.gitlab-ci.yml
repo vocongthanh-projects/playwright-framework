@@ -1,0 +1,40 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_TAG'
+
+image: mcr.microsoft.com/playwright/java:v1.61.0-noble
+
+stages:
+  - verify
+
+consumer-java:
+  stage: verify
+  before_script:
+    - mkdir -p "$HOME/.m2"
+    - |
+      cat > "$HOME/.m2/settings.xml" <<EOF
+      <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
+        <servers>
+          <server>
+            <id>playwright-framework-registry</id>
+            <username>gitlab-ci-token</username>
+            <password>${CI_JOB_TOKEN}</password>
+          </server>
+        </servers>
+      </settings>
+      EOF
+  script:
+    - test -n "$PLAYWRIGHT_FRAMEWORK_PROJECT_ID"
+    - PLAYWRIGHT_FRAMEWORK_VERSION="${PLAYWRIGHT_FRAMEWORK_VERSION:-1.0.0-SNAPSHOT}"
+    - ./mvnw --batch-mode --no-transfer-progress -Dplaywright.framework.version="$PLAYWRIGHT_FRAMEWORK_VERSION" -Dplaywright.framework.repository.url="$CI_API_V4_URL/projects/$PLAYWRIGHT_FRAMEWORK_PROJECT_ID/packages/maven" clean verify
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+    paths:
+      - target/surefire-reports/
+      - target/evidence/
+    expire_in: 7 days

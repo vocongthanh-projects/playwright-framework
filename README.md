@@ -10,11 +10,18 @@ playwright-framework/
 │   ├── framework-core/                 # Playwright, locators, lifecycle, configuration, evidence
 │   ├── framework-testng/               # plain TestNG, independent of Cucumber
 │   └── framework-cucumber-testng/      # Cucumber world, hooks, and browser matrix runner
-└── playwright-framework-typescript/    # Playwright + TypeScript framework, independent stack
+├── playwright-framework-typescript/    # Playwright + TypeScript framework, independent stack
+├── template-consumer-java/             # independent Java consumer starter
+└── template-consumer-typescript/       # independent TypeScript consumer starter
 ```
 
 The two stacks are kept in separate top-level folders and never share code or dependencies —
 see [`docs/JAVA_VS_TYPESCRIPT.md`](docs/JAVA_VS_TYPESCRIPT.md) for a syntax comparison.
+
+Use the matching starter when creating an application test repository:
+[`template-consumer-java`](template-consumer-java/README.md) or
+[`template-consumer-typescript`](template-consumer-typescript/README.md). Each is an independent
+consumer project and is not part of its framework build reactor.
 
 Dependencies flow only from adapters down to core. `framework-core` has no runtime dependency on Cucumber or TestNG.
 

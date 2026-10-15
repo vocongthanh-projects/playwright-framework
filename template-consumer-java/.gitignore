@@ -1,0 +1,7 @@
+target/
+config-local.properties
+playwright/.cache/
+.idea/
+*.iml
+.DS_Store
+*.log
