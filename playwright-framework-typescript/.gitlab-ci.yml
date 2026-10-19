@@ -1,5 +1,6 @@
 stages:
   - test
+  - mirror
   - deploy
 
 variables:
@@ -27,6 +28,50 @@ test:
     paths:
       - playwright-report/
       - test-results/
+
+# Sync this standalone GitLab project into its directory in the personal GitHub monorepo.
+mirror_personal_github:
+  stage: mirror
+  image: alpine:3.22
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  resource_group: personal-github-typescript
+  script:
+    - apk add --no-cache ca-certificates git
+    - test -n "${GITHUB_PUSH_TOKEN:-}" || (echo "GITHUB_PUSH_TOKEN is required" && exit 1)
+    - |
+      askpass_file="$(mktemp)"
+      mirror_dir="$(mktemp -d)"
+      trap 'rm -f "$askpass_file"; rm -rf "$mirror_dir"' EXIT
+      cat > "$askpass_file" <<'ASKPASS'
+      #!/bin/sh
+      case "$1" in
+        *Username*) printf '%s\n' 'x-access-token' ;;
+        *Password*) printf '%s\n' "$GITHUB_PUSH_TOKEN" ;;
+        *) exit 1 ;;
+      esac
+      ASKPASS
+      chmod 700 "$askpass_file"
+      export GIT_ASKPASS="$askpass_file"
+      export GIT_TERMINAL_PROMPT=0
+
+      git clone --branch main --single-branch \
+        https://github.com/vocongthanh247/playwright-framework.git "$mirror_dir/repo"
+      target_dir="$mirror_dir/repo/playwright-framework-typescript"
+      rm -rf "$target_dir"
+      mkdir -p "$target_dir"
+      git archive HEAD | tar -xf - -C "$target_dir"
+
+      cd "$mirror_dir/repo"
+      git config user.name "GitLab CI"
+      git config user.email "gitlab-ci@users.noreply.github.com"
+      git add -- playwright-framework-typescript
+      if git diff --cached --quiet; then
+        echo "GitHub already contains this TypeScript framework source"
+        exit 0
+      fi
+      git commit -m "chore: sync TypeScript framework from GitLab ${CI_COMMIT_SHORT_SHA}"
+      git push origin HEAD:refs/heads/main
 
 # npm registry versions are immutable, unlike Maven SNAPSHOTs — so `develop` pushes publish a
 # `-dev.<sha>` prerelease under the `next` dist-tag (opt-in), while a `vX.Y.Z` tag publishes the

@@ -43,16 +43,15 @@ export function eitherVariant(a: Locator, b: Locator): Locator {
 }
 
 /**
- * A named locator with ordered fallback strategies — the TypeScript counterpart to Java's
- * `WebLocator.of(name, ...)`. Unlike `eitherVariant`, these candidates ARE alternative guesses
- * at the same element: use it when a single strategy (e.g. only `testId`) is one markup change
- * away from breaking and you want the framework to keep resolving through role/label/css
- * fallbacks without a code change. Candidates are tried in the order given — put the most
- * accessible-tree-based strategy first, `css` last.
+ * A named locator combining alternative strategies for the same control. Unlike `eitherVariant`,
+ * these candidates are different ways to locate one logical element, such as across a markup
+ * migration. This is a locator union, not an ordered fallback: strategy order does not determine
+ * which match wins. At action/assertion time the union must resolve to one element; if multiple
+ * candidates match different elements, Playwright strict mode reports the ambiguity.
  *
- * Resolution itself is Playwright's own `Locator.or()` (native auto-waiting, no hand-rolled
- * polling); `name` is attached via `Locator.describe()` so failures and reports show the
- * logical name instead of a raw selector chain.
+ * Resolution uses Playwright's own `Locator.or()` (native auto-waiting, no hand-rolled polling);
+ * `name` is attached via `Locator.describe()` so failures and reports show the logical name
+ * instead of a raw selector chain. Ensure only one candidate can match at a time.
  */
 export function dynamicLocator(name: string, ...strategies: LocatorStrategy[]): LocatorStrategy {
   if (strategies.length === 0) {

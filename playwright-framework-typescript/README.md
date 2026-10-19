@@ -53,6 +53,22 @@ phải quy trình khởi tạo consumer dùng chung.
 `@playwright/test` là peer dependency — cài nó ở dự án consumer luôn (thường đã có sẵn, vì đó là
 test runner của bạn).
 
+## CI/CD và đồng bộ source
+
+Repo GitLab độc lập `qc-quality-control/playwright-framework-typescript` là source chính. Pipeline
+chạy typecheck, lint, build và contract test; khi các bước này qua trên `develop`, job
+`mirror_personal_github` cập nhật riêng thư mục `playwright-framework-typescript/` trong repo
+GitHub cá nhân `vocongthanh247/playwright-framework` trên nhánh `main`. Job không force-push và
+không xóa file ngoài thư mục TypeScript.
+
+Để bật đồng bộ, tạo GitLab CI/CD variable `GITHUB_PUSH_TOKEN` ở dạng masked và protected. Token
+GitHub fine-grained chỉ cần quyền **Contents: Read and write** trên repo
+`vocongthanh247/playwright-framework`. Bảo vệ nhánh `develop` để chỉ pipeline tin cậy nhận được
+biến này. Token không được lưu trong source.
+
+Job `deploy` hiện tại vẫn xuất bản prerelease `-dev.<sha>` lên dist-tag `next` khi push vào
+`develop`; release stable chỉ xuất bản khi tạo tag `vX.Y.Z`.
+
 ### Cấu trúc dự án consumer
 
 Package không đóng gói sẵn `pages/`/`tests/` — đó là layout riêng của consumer, tạo 1 lần:
@@ -109,11 +125,12 @@ storage-state, validate config) mà không consumer nào phải đổi import.
   `role` → `label`/`placeholder` → `text` → `testId` → `css` là phương án cuối. Role/label/text
   resolve dựa vào accessibility tree, nên vẫn hoạt động qua các lần đổi markup/CSS mà không cần
   sửa code. Locator chỉ sống trong page object, không bao giờ viết inline trong test.
-- **Dynamic locator**: khi 1 chiến lược duy nhất chỉ cách 1 lần đổi markup là vỡ, dùng
-  `dynamicLocator(name, ...strategies)` — bản tương đương TS của `WebLocator.of(name, ...)` bên
-  Java. Các candidate được thử lần lượt theo thứ tự qua `Locator.or()` gốc của Playwright
-  (auto-wait tự nhiên, không tự viết polling); `name` được gắn qua `Locator.describe()` nên khi
-  fail/report sẽ hiện tên logic thay vì chuỗi selector thô.
+- **Dynamic locator**: dùng `dynamicLocator(name, ...strategies)` để ghép các cách định vị thay
+  thế cho cùng một control, chẳng hạn trong giai đoạn chuyển đổi markup. Hàm dùng `Locator.or()`
+  của Playwright nên đây là phép hợp locator, không phải fallback lần lượt; thứ tự candidate
+  không quyết định candidate nào thắng. Tại thời điểm thao tác, chỉ một candidate nên khớp. Nếu
+  nhiều candidate khớp các phần tử khác nhau, Playwright strict mode sẽ báo locator mơ hồ.
+  `name` được gắn qua `Locator.describe()` để lỗi/report hiển thị tên logic thay vì chuỗi selector.
 
   ```typescript
   readonly email = dynamicLocator(
@@ -178,8 +195,8 @@ trong `framework-core`/`framework-testng`/`framework-cucumber-testng` bên Java.
 | **Page** | `page.BasePage` | Base cho page object của consumer | `base-page.ts` — `BasePage` |
 | | `page.BaseComponent` | Base cho component, giữ locator con trong scope gốc | — (TS chain `Locator` con trực tiếp) |
 | **Locator** | `locator.WebLocators` | Factory tạo locator theo semantic | `locators.ts` — `role/label/text/testId/css` |
-| | `locator.WebLocator` | Locator logic bất biến, có fallback candidate | `locators.ts` — `dynamicLocator` |
-| | `locator.LocatorResolver` | Resolve candidate theo thứ tự | — (`Locator.or()` gốc của Playwright) |
+| | `locator.WebLocator` | Locator logic bất biến, kết hợp candidate thay thế | `locators.ts` — `dynamicLocator` (`Locator.or()`, không ưu tiên theo thứ tự) |
+| | `locator.LocatorResolver` | Chọn candidate theo thứ tự | — (không tương đương; `Locator.or()` tạo phép hợp locator) |
 | | `locator.LocatorStrategy` | Interface 1 chiến lược locate | `locators.ts` — type `LocatorStrategy` |
 | | `locator.LocatorCandidate` | 1 cách cụ thể để locate 1 phần tử | — (gộp vào `LocatorStrategy`) |
 | | `locator.LocatorDefinition` | Contract locator logic do app định nghĩa | — (dùng function trực tiếp, không cần interface) |
