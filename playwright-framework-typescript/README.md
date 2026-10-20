@@ -55,7 +55,7 @@ test runner của bạn).
 
 ## CI/CD và đồng bộ source
 
-Repo GitLab độc lập `qc-quality-control/playwright-framework-typescript` là source chính. Pipeline
+Repo GitLab độc lập `<GITLAB_GROUP>/playwright-framework-typescript` là source chính. Pipeline
 chạy typecheck, lint, build và contract test; khi các bước này qua trên `develop`, job
 `mirror_personal_github` cập nhật riêng thư mục `playwright-framework-typescript/` trong repo
 GitHub cá nhân `vocongthanh247/playwright-framework` trên nhánh `main`. Job không force-push và

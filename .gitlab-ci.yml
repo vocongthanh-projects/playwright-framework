@@ -6,6 +6,7 @@ workflow:
 
 stages:
   - verify
+  - notify
 
 java-framework:
   stage: verify
@@ -64,3 +65,35 @@ typescript-framework:
     paths:
       - playwright-framework-typescript/playwright-report/
       - playwright-framework-typescript/test-results/
+
+telegram-success:
+  stage: notify
+  image: python:3.12-slim
+  when: on_success
+  variables:
+    TELEGRAM_CHAT_ID: "$TELEGRAM_CHAT_GITLAB_OTS_FLI"
+    TELEGRAM_THREAD_ID: "$TELEGRAM_THREAD_GITLAB_OTS_FLI"
+    TELEGRAM_STATUS: "success"
+  script:
+    - python3 scripts/notify_telegram.py
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop" && $TELEGRAM_BOT_TOKEN && $TELEGRAM_CHAT_GITLAB_OTS_FLI && $TELEGRAM_THREAD_GITLAB_OTS_FLI'
+      when: on_success
+    - when: never
+  allow_failure: true
+
+telegram-failure:
+  stage: notify
+  image: python:3.12-slim
+  when: on_failure
+  variables:
+    TELEGRAM_CHAT_ID: "$TELEGRAM_CHAT_GITLAB_OTS_FLI"
+    TELEGRAM_THREAD_ID: "$TELEGRAM_THREAD_GITLAB_OTS_FLI"
+    TELEGRAM_STATUS: "failed"
+  script:
+    - python3 scripts/notify_telegram.py
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop" && $TELEGRAM_BOT_TOKEN && $TELEGRAM_CHAT_GITLAB_OTS_FLI && $TELEGRAM_THREAD_GITLAB_OTS_FLI'
+      when: on_failure
+    - when: never
+  allow_failure: true

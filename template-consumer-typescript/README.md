@@ -8,7 +8,7 @@
 
 | Tiêu chí | Framework Package (`@ots/playwright-core-ts`) | Template Consumer (Repository này) | Dự Án Sản Phẩm Thật (Sau khi clone từ template) |
 | :--- | :--- | :--- | :--- |
-| **Bản chất** | **Thư viện nền tảng (Shared Library)** | **Bộ khung mẫu rỗng (Starter Kit / Skeleton)** | **Repository kiểm thử sản phẩm cụ thể** (vd: `ui-g-connect`) |
+| **Bản chất** | **Thư viện nền tảng (Shared Library)** | **Bộ khung mẫu rỗng (Starter Kit / Skeleton)** | **Repository kiểm thử sản phẩm cụ thể** (vd: `ui-product`) |
 | **Trách nhiệm** | Cung cấp `BasePage`, helper định vị (`role`, `dynamicLocator`), `test`, `expect` | Cung cấp cấu trúc thư mục, cấu hình runner, fixtures mở rộng, smoke test giả lập | Cung cấp Page Object nghiệp vụ, kịch bản test sản phẩm thật |
 | **Dữ liệu & Credentials** | **Không** chứa URL, không selector sản phẩm, không credential | **Chỉ chứa Placeholder mẫu** (`REPLACE_ME`); hoàn toàn KHÔNG có dữ liệu thật | Chứa URL thật của môi trường (staging/dev) và tài khoản test thật |
 | **Cách dùng** | Được import vào `fixtures.ts` và `pages/` | Dùng làm gốc để tạo repo Git mới cho sản phẩm | Thực thi hàng ngày trên local máy tester và CI/CD |
@@ -20,7 +20,7 @@
 ### Cách A: Dùng chức năng GitLab Template (Khuyến nghị)
 1. Lên GitLab nội bộ của tổ chức.
 2. Chọn **New Project** ➡️ **Create from template** (hoặc chọn template nếu nhóm đã đánh dấu).
-3. Đặt tên cho dự án mới (ví dụ: `ui-g-connect`, `ui-portal-test`).
+3. Đặt tên cho dự án mới (ví dụ: `ui-product`, `ui-portal-test`).
 
 ### Cách B: Copy thư mục thủ công
 ```bash
@@ -58,7 +58,8 @@ File `.npmrc` đã được chuẩn bị sẵn mẫu cấu hình. Bạn thay th�
 * **Trên máy cá nhân (Local):**
   Lấy Personal Access Token từ GitLab (cần quyền `read_package_registry`) và lưu vào cấu hình shell máy:
   ```bash
-  echo 'export GITLAB_TOKEN="glpat-your-token-here"' >> ~/.zshrc
+   Không ghi token thật vào README, `.zshrc` hoặc câu lệnh có thể nằm trong shell history.
+   Khi chạy local, nạp token từ secret manager hoặc file `.env` bị Git ignore và giới hạn quyền đọc; trong CI, dùng GitLab CI/CD variable `GITLAB_TOKEN` dạng masked/protected.
   source ~/.zshrc
   ```
 * **Trên CI/CD (GitLab Runner):**
