@@ -1,0 +1,7 @@
+# Local developer configuration overrides
+# Copy this file to 'config-local' and replace placeholders with your credentials.
+# 'config-local' is ignored by Git and overrides 'config'.
+BASE_URL=https://replace-me-with-local-or-dev-url.example
+HEADLESS=false
+TEST_USERNAME=REPLACE_ME_WITH_TEST_USERNAME
+TEST_PASSWORD=REPLACE_ME_WITH_TEST_PASSWORD

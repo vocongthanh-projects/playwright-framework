@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright/java:v1.61.0-noble
+FROM mcr.microsoft.com/playwright/java:v1.63.0-noble
 
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \

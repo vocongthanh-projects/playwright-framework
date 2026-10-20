@@ -1,0 +1,2 @@
+# Keep the Windows Maven wrapper with native line endings while storing normalized text.
+*.cmd text eol=crlf

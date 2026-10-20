@@ -1,0 +1,4 @@
+# Baseline environment configuration (committed to repository)
+# Replace with your staging or default application URL
+BASE_URL=https://replace-me-with-app-url.example
+HEADLESS=true

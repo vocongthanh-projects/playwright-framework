@@ -1,0 +1,42 @@
+{
+  "name": "@ots/playwright-core-ts",
+  "version": "0.1.0",
+  "description": "Reusable Playwright + TypeScript automation framework (BasePage, locator strategies, fixtures) — sibling to the Java framework modules. Consumer apps own page objects, tests, and product locators.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vocongthanh247/playwright-framework.git",
+    "directory": "playwright-framework-typescript"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "prepack": "npm run build",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.60.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.7.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-playwright": "^2.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.15.0"
+  }
+}

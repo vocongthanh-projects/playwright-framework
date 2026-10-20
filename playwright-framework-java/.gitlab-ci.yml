@@ -1,0 +1,58 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_TAG'
+
+image: mcr.microsoft.com/playwright/java:v1.63.0-noble
+
+stages:
+  - test
+  - deploy
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
+  MAVEN_CLI_OPTS: "-B -ntp -Dstyle.color=never"
+  JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
+  PLAYWRIGHT_BROWSERS_PATH: "/ms-playwright"
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+
+cache:
+  key:
+    files:
+      - pom.xml
+      - framework-core/pom.xml
+      - framework-cucumber-testng/pom.xml
+      - .mvn/wrapper/maven-wrapper.properties
+  paths:
+    - .m2/repository
+
+verify:
+  stage: test
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -Pbrowser-contract clean verify
+  artifacts:
+    expire_in: 7 days
+    paths:
+      - framework-core/target/framework-core-*.jar
+      - framework-core/target/surefire-reports/
+      - framework-core/target/failsafe-reports/
+      - framework-testng/target/framework-testng-*.jar
+      - framework-testng/target/surefire-reports/
+      - framework-cucumber-testng/target/framework-cucumber-testng-*.jar
+      - framework-cucumber-testng/target/surefire-reports/
+
+# Maven SNAPSHOT versions are mutable, unlike npm — so a `develop` push can safely redeploy the
+# same -SNAPSHOT version. A `vX.Y.Z` tag bumps every module to that release version first.
+deploy:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        RELEASE_VERSION="${CI_COMMIT_TAG#v}"
+        ./mvnw $MAVEN_CLI_OPTS versions:set -DnewVersion="$RELEASE_VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
+      fi
+    - ./mvnw $MAVEN_CLI_OPTS deploy -DskipTests -s ci_settings.xml
