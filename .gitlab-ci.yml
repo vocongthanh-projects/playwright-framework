@@ -1,61 +1,62 @@
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH == "main"'
-
-image: mcr.microsoft.com/playwright/java:v1.61.0-noble
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_TAG'
 
 stages:
-  - test
+  - verify
 
-variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
-  JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
-  PLAYWRIGHT_BROWSERS_PATH: "/ms-playwright"
-  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
-
-cache:
-  key:
-    files:
-      - playwright-framework-java/pom.xml
-      - playwright-framework-java/framework-core/pom.xml
-      - playwright-framework-java/framework-cucumber-testng/pom.xml
-      - playwright-framework-java/.mvn/wrapper/maven-wrapper.properties
-  paths:
-    - .m2/repository
-
-verify:
-  stage: test
+java-framework:
+  stage: verify
+  image: mcr.microsoft.com/playwright/java:v1.63.0-noble
+  interruptible: true
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+    PLAYWRIGHT_BROWSERS_PATH: "/ms-playwright"
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+  cache:
+    key:
+      files:
+        - playwright-framework-java/pom.xml
+        - playwright-framework-java/.mvn/wrapper/maven-wrapper.properties
+    paths:
+      - .m2/repository/
+  before_script:
+    - chmod +x playwright-framework-java/mvnw
   script:
     - cd playwright-framework-java
-    - ./mvnw --batch-mode -Pbrowser-contract clean verify
+    - ./mvnw --batch-mode --no-transfer-progress -Pbrowser-contract clean verify
   artifacts:
+    when: always
     expire_in: 7 days
+    reports:
+      junit:
+        - "playwright-framework-java/**/target/surefire-reports/TEST-*.xml"
+        - "playwright-framework-java/**/target/failsafe-reports/TEST-*.xml"
     paths:
-      - playwright-framework-java/framework-core/target/framework-core-*.jar
-      - playwright-framework-java/framework-core/target/surefire-reports/
-      - playwright-framework-java/framework-core/target/failsafe-reports/
-      - playwright-framework-java/framework-testng/target/framework-testng-*.jar
-      - playwright-framework-java/framework-testng/target/surefire-reports/
-      - playwright-framework-java/framework-cucumber-testng/target/framework-cucumber-testng-*.jar
-      - playwright-framework-java/framework-cucumber-testng/target/surefire-reports/
+      - playwright-framework-java/**/target/surefire-reports/
+      - playwright-framework-java/**/target/failsafe-reports/
 
-typescript:
-  stage: test
-  image: mcr.microsoft.com/playwright:v1.63.0-noble
+typescript-framework:
+  stage: verify
+  image: mcr.microsoft.com/playwright:v1.64.1-noble
+  interruptible: true
   variables:
     CI: "true"
+    npm_config_cache: "$CI_PROJECT_DIR/.npm"
   cache:
     key:
       files:
         - playwright-framework-typescript/package-lock.json
     paths:
-      - playwright-framework-typescript/node_modules
+      - .npm/
   script:
     - cd playwright-framework-typescript
     - npm ci
     - npm run typecheck
     - npm run lint
+    - npm run build
     - npm test
   artifacts:
     when: always
