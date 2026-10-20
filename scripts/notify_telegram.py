@@ -1,4 +1,4 @@
-"""Send a GitLab pipeline result to the configured Telegram topic."""
+"""Send a consistently formatted GitLab pipeline result to Telegram."""
 
 import html
 import json
@@ -19,22 +19,25 @@ def main() -> None:
     token = required("TELEGRAM_BOT_TOKEN")
     chat_id = required("TELEGRAM_CHAT_ID")
     thread_id = required("TELEGRAM_THREAD_ID")
-    status = os.getenv("TELEGRAM_STATUS", "unknown").strip().upper()
-    project = html.escape(os.getenv("CI_PROJECT_NAME", "Playwright Framework"))
+    status = os.getenv("TELEGRAM_STATUS", "UNKNOWN").strip().upper()
+    project = html.escape(os.getenv("CI_PROJECT_NAME", "framework-playwright"))
     branch = html.escape(os.getenv("CI_COMMIT_REF_NAME", "unknown"))
     commit = html.escape(os.getenv("CI_COMMIT_SHORT_SHA", "unknown"))
     pipeline_url = os.getenv("CI_PIPELINE_URL", "").strip()
-    status_icon = "✅" if status == "SUCCESS" else "❌"
-    link = (
+    status_icon = "✅" if status == "SUCCESS" else "❌" if status == "FAILED" else "🔔"
+    details = (
         f'<a href="{html.escape(pipeline_url, quote=True)}">Open pipeline</a>'
         if pipeline_url
         else "Pipeline URL unavailable"
     )
     message = (
-        f"{status_icon} <b>{project} · CI/CD pipeline</b>\n"
+        f"{status_icon} <b>Framework CI/CD notification</b>\n"
+        f"Project: <code>{project}</code>\n"
+        f"Platform: <b>GitLab</b>\n"
         f"Status: <b>{html.escape(status)}</b>\n"
-        f"Ref: <code>{branch}</code> · Commit: <code>{commit}</code>\n"
-        f"{link}"
+        f"Ref: <code>{branch}</code>\n"
+        f"Commit: <code>{commit}</code>\n"
+        f"Details: {details}"
     )
     payload = urllib.parse.urlencode(
         {
