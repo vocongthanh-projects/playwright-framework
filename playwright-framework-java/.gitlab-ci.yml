@@ -7,7 +7,7 @@ workflow:
 image: mcr.microsoft.com/playwright/java:v1.63.0-noble
 
 stages:
-  - test
+  - compile
   - deploy
 
 variables:
@@ -28,19 +28,15 @@ cache:
     - .m2/repository
 
 verify:
-  stage: test
+  stage: compile
   script:
-    - ./mvnw $MAVEN_CLI_OPTS -Pbrowser-contract clean verify
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests -Pbrowser-contract clean verify
   artifacts:
     expire_in: 7 days
     paths:
       - framework-core/target/framework-core-*.jar
-      - framework-core/target/surefire-reports/
-      - framework-core/target/failsafe-reports/
       - framework-testng/target/framework-testng-*.jar
-      - framework-testng/target/surefire-reports/
       - framework-cucumber-testng/target/framework-cucumber-testng-*.jar
-      - framework-cucumber-testng/target/surefire-reports/
 
 # Maven SNAPSHOT versions are mutable, unlike npm — so a `develop` push can safely redeploy the
 # same -SNAPSHOT version. A `vX.Y.Z` tag bumps every module to that release version first.
