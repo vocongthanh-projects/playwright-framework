@@ -21,8 +21,8 @@ trong GitLab Maven Package Registry. Nếu cần thử framework trực tiếp t
 reactor vào local Maven repository:
 
 ```bash
-git clone https://github.com/vocongthanh247/playwright-framework.git
-cd playwright-framework/playwright-framework-java
+git clone https://github.com/vocongthanh247/playwright-framework.git framework-playwright
+cd framework-playwright/playwright-framework-java
 ./mvnw clean install
 ```
 
@@ -197,11 +197,11 @@ Contract tích hợp browser thật:
 ./mvnw -Pbrowser-contract clean verify
 ```
 
-CI chạy profile `browser-contract` trên image Playwright pin đúng version. Integration test thật verify locator fallback, component scope, fill, click, upload, download, dialog, và popup behavior trên Chromium.
+Các lệnh trên dùng để kiểm thử local. Source pipeline OTS/FLI chỉ compile, không chạy browser test. Chạy browser contract suite từ hạ tầng kiểm thử riêng.
 
 ## Publishing
 
-`.gitlab-ci.yml` có `deploy` stage theo đúng pattern `api-framework`/`playwright-framework-typescript`:
+`.gitlab-ci.yml` có `deploy` stage theo đúng pattern `framework-api`/`playwright-framework-typescript`:
 
 - Push tag `vX.Y.Z` → bump tất cả module lên version release đó và deploy lên GitLab Maven registry.
 - Push lên `develop` → deploy version `-SNAPSHOT` hiện tại (Maven cho phép ghi đè SNAPSHOT, khác version release).

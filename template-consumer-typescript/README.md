@@ -99,10 +99,10 @@ Lưu ý rằng việc khai báo browser trong `playwright.config.ts` **không t�
 
 Cấu hình trong `playwright.config.ts` được phân định rõ theo quy ước kiểm thử của nhóm:
 * **Ở máy cá nhân (Local dev):** Mặc định chạy song song **Chromium** và **WebKit (Safari Engine)** để tối ưu tốc độ phản hồi, giảm tải tài nguyên và phục vụ vòng lặp phản hồi nhanh của kiểm thử viên.
-* **Trên hệ thống CI/CD (`process.env.CI`):** Tự động mở rộng thêm **Firefox** (`...(process.env.CI ? [{ name: 'firefox', ... }] : [])`) để đảm bảo ma trận kiểm thử toàn diện trên 3 trình duyệt chính.
+* **Trong pipeline test của hạ tầng kiểm thử (`process.env.CI`):** Tự động mở rộng thêm **Firefox** (`...(process.env.CI ? [{ name: 'firefox', ... }] : [])`) để đảm bảo ma trận kiểm thử toàn diện trên 3 trình duyệt chính. Source push/MR pipeline chỉ compile, không chạy browser test.
 
 > 💡 **Ghi chú về việc chạy Firefox tại local:**
-> Đây là chính sách phân bổ môi trường kiểm thử chủ động của nhóm. Sự cố khởi chạy Firefox (như thông báo lỗi khởi tạo thư mục profile) là hiện tượng quan sát được trong một số môi trường máy trạm cá nhân cụ thể (chẳng hạn như ghi nhận tại [Playwright Issue #42768](https://github.com/microsoft/playwright/issues/42768)), không phải đặc tính cố hữu của mọi máy macOS. Việc đưa Firefox về thực thi chính trên môi trường Linux CI Runner tiêu chuẩn giúp đảm bảo tính đồng nhất, loại bỏ các biến số phụ thuộc vào cấu hình máy trạm cá nhân. Kỹ sư vẫn có thể chạy Firefox tại local khi cần bằng lệnh: `CI=true npx playwright test --project=firefox`.
+> Đây là chính sách phân bổ môi trường kiểm thử chủ động của nhóm. Sự cố khởi chạy Firefox (như thông báo lỗi khởi tạo thư mục profile) là hiện tượng quan sát được trong một số môi trường máy trạm cá nhân cụ thể (chẳng hạn như ghi nhận tại [Playwright Issue #42768](https://github.com/microsoft/playwright/issues/42768)), không phải đặc tính cố hữu của mọi máy macOS. Firefox chạy trên runner Linux của hạ tầng kiểm thử riêng, loại bỏ các biến số phụ thuộc vào cấu hình máy trạm cá nhân. Kỹ sư vẫn có thể chạy Firefox tại local khi cần bằng lệnh: `CI=true npx playwright test --project=firefox`.
 
 ---
 
