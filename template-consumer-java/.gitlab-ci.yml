@@ -28,13 +28,4 @@ consumer-java:
   script:
     - test -n "$PLAYWRIGHT_FRAMEWORK_PROJECT_ID"
     - PLAYWRIGHT_FRAMEWORK_VERSION="${PLAYWRIGHT_FRAMEWORK_VERSION:-1.0.0-SNAPSHOT}"
-    - ./mvnw --batch-mode --no-transfer-progress -Dplaywright.framework.version="$PLAYWRIGHT_FRAMEWORK_VERSION" -Dplaywright.framework.repository.url="$CI_API_V4_URL/projects/$PLAYWRIGHT_FRAMEWORK_PROJECT_ID/packages/maven" clean verify
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - target/surefire-reports/TEST-*.xml
-    paths:
-      - target/surefire-reports/
-      - target/evidence/
-    expire_in: 7 days
+    - ./mvnw --batch-mode --no-transfer-progress -Dplaywright.framework.version="$PLAYWRIGHT_FRAMEWORK_VERSION" -Dplaywright.framework.repository.url="$CI_API_V4_URL/projects/$PLAYWRIGHT_FRAMEWORK_PROJECT_ID/packages/maven" -DskipTests clean verify

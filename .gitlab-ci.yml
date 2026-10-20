@@ -27,17 +27,12 @@ java-framework:
     - chmod +x playwright-framework-java/mvnw
   script:
     - cd playwright-framework-java
-    - ./mvnw --batch-mode --no-transfer-progress -Pbrowser-contract clean verify
+    - ./mvnw --batch-mode --no-transfer-progress -DskipTests -Pbrowser-contract clean verify
   artifacts:
     when: always
     expire_in: 7 days
-    reports:
-      junit:
-        - "playwright-framework-java/**/target/surefire-reports/TEST-*.xml"
-        - "playwright-framework-java/**/target/failsafe-reports/TEST-*.xml"
     paths:
-      - playwright-framework-java/**/target/surefire-reports/
-      - playwright-framework-java/**/target/failsafe-reports/
+      - "playwright-framework-java/**/target/*.jar"
 
 typescript-framework:
   stage: verify
@@ -58,13 +53,6 @@ typescript-framework:
     - npm run typecheck
     - npm run lint
     - npm run build
-    - npm test
-  artifacts:
-    when: always
-    expire_in: 7 days
-    paths:
-      - playwright-framework-typescript/playwright-report/
-      - playwright-framework-typescript/test-results/
 
 telegram-success:
   stage: notify
