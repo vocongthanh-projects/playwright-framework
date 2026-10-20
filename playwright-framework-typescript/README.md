@@ -40,13 +40,13 @@ token, lockfile, browser binaries và CI.
 Khi phát triển framework, có thể clone và build source local:
 
 ```bash
-git clone https://github.com/vocongthanh247/playwright-framework.git
-cd playwright-framework/playwright-framework-typescript
+git clone https://github.com/vocongthanh247/playwright-framework.git framework-playwright
+cd framework-playwright/playwright-framework-typescript
 npm install
 npm run build
 ```
 
-Rồi tham chiếu package qua đường dẫn local (`npm install ../playwright-framework/playwright-framework-typescript`
+Rồi tham chiếu package qua đường dẫn local (`npm install ../framework-playwright/playwright-framework-typescript`
 hoặc `npm link`) để thử thay đổi framework trước khi publish. Đây là đường phát triển local, không
 phải quy trình khởi tạo consumer dùng chung.
 
@@ -55,8 +55,8 @@ test runner của bạn).
 
 ## CI/CD và đồng bộ source
 
-Repo GitLab độc lập `<GITLAB_GROUP>/playwright-framework-typescript` là source chính. Pipeline
-chạy typecheck, lint, build và contract test; khi các bước này qua trên `develop`, job
+Repo GitLab độc lập `<GITLAB_GROUP>/playwright-framework-typescript` là source chính. Source pipeline
+chạy typecheck, lint và build, không chạy contract/product test; khi các bước compile qua trên `develop`, job
 `mirror_personal_github` cập nhật riêng thư mục `playwright-framework-typescript/` trong repo
 GitHub cá nhân `vocongthanh247/playwright-framework` trên nhánh `main`. Job không force-push và
 không xóa file ngoài thư mục TypeScript.
@@ -156,7 +156,7 @@ npm install
 npx playwright install        # chỉ lần đầu, tải browser binary
 
 npm run build                 # compile src/ -> dist/ (entry point main/types)
-npm test                      # chạy contract test của chính framework
+npm test                      # chạy contract test local của chính framework
 npm run test:ui                # chế độ UI tương tác
 npm run typecheck              # tsc --noEmit
 npm run lint                   # eslint .
@@ -165,8 +165,8 @@ npm run format                 # prettier --write .
 
 ## Publishing
 
-Publish lên npm registry nội bộ, theo đúng pattern Maven registry của
-`api-framework`. `.gitlab-ci.yml` có `deploy` stage:
+Publish lên npm registry nội bộ, theo cùng quy trình package với
+`framework-api`. Source pipeline typecheck/lint/build, không chạy contract test; `.gitlab-ci.yml` có `deploy` stage:
 
 - Push tag `vX.Y.Z` → publish đúng version đó dưới dist-tag `latest`. Đây là đường duy nhất
   consumer nên cài từ đó.

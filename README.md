@@ -5,7 +5,7 @@ A reusable web automation framework for multiple projects. The source contains o
 ## Modules
 
 ```text
-playwright-framework/
+framework-playwright/
 ├── playwright-framework-java/          # Java + Maven framework (this document)
 │   ├── framework-core/                 # Playwright, locators, lifecycle, configuration, evidence
 │   ├── framework-testng/               # plain TestNG, independent of Cucumber
@@ -205,6 +205,6 @@ Browser integration contract:
 cd playwright-framework-java && ./mvnw -Pbrowser-contract clean verify
 ```
 
-CI runs the `browser-contract` profile in a Playwright image pinned to the same version. The real integration test verifies logical locator fallback, component scope, fill, click, upload, download, dialog, and popup behavior on Chromium.
+These commands are for local verification. OTS/FLI source pipelines only typecheck, lint, build, and compile; they do not run browser tests. Run the browser contract suite from the dedicated test infrastructure.
 
 See [architecture](docs/ARCHITECTURE.md) and the [quality audit](docs/QUALITY_AUDIT.md).
