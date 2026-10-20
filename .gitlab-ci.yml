@@ -1,16 +1,19 @@
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
     - if: '$CI_COMMIT_BRANCH == "develop"'
     - if: '$CI_COMMIT_TAG'
 
 stages:
-  - verify
+  - validate
   - notify
 
-java-framework:
-  stage: verify
+java-compile:
+  stage: validate
   image: mcr.microsoft.com/playwright/java:v1.63.0-noble
+  timeout: 15m
   interruptible: true
   variables:
     MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
@@ -34,9 +37,10 @@ java-framework:
     paths:
       - "playwright-framework-java/**/target/*.jar"
 
-typescript-framework:
-  stage: verify
+typescript-compile:
+  stage: validate
   image: mcr.microsoft.com/playwright:v1.64.1-noble
+  timeout: 15m
   interruptible: true
   variables:
     CI: "true"
@@ -57,15 +61,16 @@ typescript-framework:
 telegram-success:
   stage: notify
   image: python:3.12-slim
+  timeout: 2m
   when: on_success
   variables:
     TELEGRAM_CHAT_ID: "$TELEGRAM_CHAT_GITLAB_OTS_FLI"
     TELEGRAM_THREAD_ID: "$TELEGRAM_THREAD_GITLAB_OTS_FLI"
-    TELEGRAM_STATUS: "success"
+    TELEGRAM_STATUS: "SUCCESS"
   script:
     - python3 scripts/notify_telegram.py
   rules:
-    - if: '$CI_COMMIT_BRANCH == "develop" && $TELEGRAM_BOT_TOKEN && $TELEGRAM_CHAT_GITLAB_OTS_FLI && $TELEGRAM_THREAD_GITLAB_OTS_FLI'
+    - if: '$TELEGRAM_BOT_TOKEN && $TELEGRAM_CHAT_GITLAB_OTS_FLI && $TELEGRAM_THREAD_GITLAB_OTS_FLI'
       when: on_success
     - when: never
   allow_failure: true
@@ -73,15 +78,16 @@ telegram-success:
 telegram-failure:
   stage: notify
   image: python:3.12-slim
+  timeout: 2m
   when: on_failure
   variables:
     TELEGRAM_CHAT_ID: "$TELEGRAM_CHAT_GITLAB_OTS_FLI"
     TELEGRAM_THREAD_ID: "$TELEGRAM_THREAD_GITLAB_OTS_FLI"
-    TELEGRAM_STATUS: "failed"
+    TELEGRAM_STATUS: "FAILED"
   script:
     - python3 scripts/notify_telegram.py
   rules:
-    - if: '$CI_COMMIT_BRANCH == "develop" && $TELEGRAM_BOT_TOKEN && $TELEGRAM_CHAT_GITLAB_OTS_FLI && $TELEGRAM_THREAD_GITLAB_OTS_FLI'
+    - if: '$TELEGRAM_BOT_TOKEN && $TELEGRAM_CHAT_GITLAB_OTS_FLI && $TELEGRAM_THREAD_GITLAB_OTS_FLI'
       when: on_failure
     - when: never
   allow_failure: true
