@@ -4,7 +4,7 @@ This repository contains two separate reusable web automation implementations: J
 
 ## Before changing files
 
-- Read this file, `README.md`, [consumer source layout](docs/CONSUMER_SOURCE_LAYOUT.md), and the relevant implementation/module documentation.
+- Read this file, `README.md`, [framework source layout](docs/FRAMEWORK_SOURCE_LAYOUT.md), [consumer source layout](docs/CONSUMER_SOURCE_LAYOUT.md), and the relevant implementation/module documentation.
 - Keep the Java and TypeScript implementations independent. Do not assume they share code, dependencies, release versions, or package mechanisms.
 - Treat the existing framework and consumer boundary as authoritative. Add a capability to the shared framework only when it is product-neutral; keep application behavior in consumers.
 - In Java, group source packages by automation capability inside the Maven modules and mirror them in contract tests. In TypeScript, keep the public surface in `src/index.ts`; group source by capability only when it improves navigation, and keep tests under Playwright's configured test directory.

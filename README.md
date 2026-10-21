@@ -2,6 +2,8 @@
 
 A reusable web automation framework for multiple projects. The source contains only automation infrastructure; URLs, selectors, pages, steps, credentials, and test data belong to the consuming application repository.
 
+The cross-framework source organization rules are documented in [Framework Source Layout](docs/FRAMEWORK_SOURCE_LAYOUT.md). Java/Maven and TypeScript keep their native source roots and runner conventions.
+
 ## Modules
 
 ```text
