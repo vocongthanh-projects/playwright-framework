@@ -6,14 +6,17 @@ The Java and TypeScript implementations remain independent because their executi
 
 TypeScript keeps the public package surface behind `src/index.ts` and extends Playwright Test through native fixtures. Its source may remain a few focused files while the API is small; split into subdirectories by public capability only when that improves navigation. Do not reproduce Java modules or lifecycle adapters mechanically in TypeScript.
 
-Consumer applications group page objects, components, and tests by product feature. Keep Playwright configuration and shared fixtures at the consumer root, and add feature subdirectories as the suite grows:
+Consumer page objects, components, and tests follow the shared portal/module ownership model. Java uses Maven packages with `pages/components/tests`; TypeScript keeps root Playwright fixtures/config and mirrors portal/module ownership under `pages/` and `tests/`. `service` is an API-only term and is not added to UI source trees. See [Consumer Source Layout](CONSUMER_SOURCE_LAYOUT.md).
 
 ```text
-Java:      features/<feature>/{pages,components,tests}/
-TypeScript: pages/<feature>/, components/<feature>/, tests/<feature>/
+Java:       portals/<portal>/modules/<module>/{pages,components,tests}/
+TypeScript: pages/<portal>/<module>/, components/<portal>/<module>/,
+            tests/<portal>/<module>/*.spec.ts
+            fixtures.ts and playwright.config.ts stay at project root
+Both:       workflows/<workflow>/tests/ or *.spec.ts for journeys across modules
 ```
 
-Product selectors, pages, fixtures, and assertions remain in the consumer repository.
+The TypeScript template extends the framework's native Playwright `test` with fixtures; it does not add Java-style base test classes or Maven module structure. Product selectors, pages, fixtures, and assertions remain in consumer repositories.
 
 ## Dependency direction
 

@@ -6,7 +6,7 @@ Standalone Java 17/Maven/TestNG starter for a new web UI test repository. It con
 
 - `framework-testng` dependency and GitLab Maven Registry wiring.
 - Typed framework configuration and local override example.
-- Neutral `SamplePage` and an offline smoke test using a `data:` document, grouped under `features/sample/`.
+- Neutral `SamplePage` and an offline smoke test using a `data:` document, grouped under `portals/sample/modules/home/`.
 - Playwright browser installation profile and a CI job using a matching Playwright Java image.
 - Screenshots, HTML evidence, and traces are produced by the framework on failure according to framework configuration.
 
@@ -16,20 +16,19 @@ Create an empty GitLab repository, clone it, and copy the contents of this templ
 
 ## Consumer source layout
 
-Keep the consumer's page objects and tests together by feature, with shared configuration and test infrastructure at the package root:
+Organize web UI source by portal and feature module. Java keeps page objects, reusable components, and behavior tests together; journeys spanning modules live in `workflows/`. See [Consumer Source Layout](../docs/CONSUMER_SOURCE_LAYOUT.md) for the convention shared with API and Appium consumers.
 
 ```text
 src/test/java/<package_root>/
-├── config/                     # consumer settings
-├── fixtures/                   # shared TestNG providers or setup
-└── features/<feature>/
-    ├── pages/                  # page objects
-    ├── components/             # reusable UI components, when needed
-    └── tests/                  # TestNG scenarios
+├── base/ config/ fixtures/                    # consumer wiring and setup
+├── portals/<portal>/modules/<module>/
+│   ├── pages/                                 # page objects
+│   ├── components/                            # reusable UI components, when needed
+│   └── tests/                                 # TestNG scenarios
+└── workflows/<workflow>/tests/               # journeys across modules
 ```
 
-For Cucumber, keep `.feature` files under `src/test/resources/features/<feature>/` and glue under the matching feature package. Split suites by behavior when that clarifies ownership; do not create a suite per endpoint.
-
+For Cucumber, keep `.feature` files under `src/test/resources/features/<portal>/<module>/` and glue under the matching Java package. Keep assertions in tests and browser interactions/page-specific behavior in page objects.
 ## Install the framework dependency
 
 The template defaults to `1.0.0-SNAPSHOT`. Confirm the artifact exists in the Playwright Framework project's Maven Package Registry first. In the consumer GitLab project, set `PLAYWRIGHT_FRAMEWORK_PROJECT_ID` to the framework project's ID and add this consumer to that framework project's CI job-token allowlist. CI authenticates with `CI_JOB_TOKEN` and the repository ID `playwright-framework-registry`.

@@ -150,24 +150,22 @@ Hàm `dynamicLocator` trong framework kết hợp các chiến lược định v
 
 ## 7. Cấu Trúc Thư Mục Cho Consumer
 
-TypeScript giữ cấu trúc tự nhiên của Playwright Test: `fixtures.ts` mở rộng fixture, `tests/` chứa spec và Page Object nằm theo feature. Không tạo Java-style base test class hoặc adapter module để mô phỏng TestNG.
+TypeScript giữ fixture/config và discovery tự nhiên của Playwright Test ở root. Page objects và spec nhóm theo cùng portal/module với các consumer Java; không thêm `client/model` cho UI hay Java-style base class. Xem [Consumer Source Layout](../docs/CONSUMER_SOURCE_LAYOUT.md) để xem glossary và đối chiếu bốn stack.
 
 ```text
 template-consumer-typescript/
-├── pages/                 # Page Object của consumer, nhóm tiếp theo theo feature
-│   └── <feature>/
-├── tests/                 # Spec Playwright, nhóm tiếp theo theo feature
-│   └── <feature>/*.spec.ts
-├── fixtures.ts            # Nơi mở rộng fixture và inject Page Object
-├── config                 # Môi trường baseline (chỉ chứa placeholder)
-├── config-local.example   # Mẫu override local (chứa placeholder REPLACE_ME)
-├── .gitignore             # Bỏ qua node_modules, config-local, test-results
-├── .npmrc                 # Mẫu định tuyến registry qua ${GITLAB_TOKEN} (HTTPS)
-├── playwright.config.ts   # Cấu hình test runner Playwright
-├── tsconfig.json          # Cấu hình TypeScript compiler (Strict mode)
-└── package.json           # Quản lý script và dependencies
+├── pages/<portal>/<module>/                  # Page Objects
+├── components/<portal>/<module>/             # UI components dùng lại khi cần
+├── tests/<portal>/<module>/*.spec.ts         # Playwright specs
+├── workflows/<workflow>/*.spec.ts            # journey qua nhiều module
+├── fixtures.ts                               # fixtures và injection Page Object
+├── playwright.config.ts                      # cấu hình runner
+├── config                                    # baseline placeholder config
+├── config-local.example                      # local override example
+└── package.json / tsconfig.json
 ```
 
+Ví dụ mẫu nằm tại `pages/sample/home/` và `tests/sample/home/`. Fixture root imports Page Object theo đường dẫn này; khi thêm module, giữ cùng đường dẫn ownership ở `pages/` và `tests/`.
 ---
 
 ## 8. Các Lệnh Thực Thi Thường Dùng

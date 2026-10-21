@@ -1,4 +1,4 @@
-package vn.ots.qc.consumer.template.features.sample.pages;
+package vn.ots.qc.consumer.template.portals.sample.modules.home.pages;
 
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;

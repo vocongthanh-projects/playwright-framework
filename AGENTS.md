@@ -1,10 +1,10 @@
 # Repository AI Instructions
 
-This repository contains two separate reusable web automation implementations: Java and TypeScript. Product URLs, selectors, pages, steps, credentials, test data, and business scenarios belong to consumer repositories.
+This repository contains two separate reusable web automation implementations: Java and TypeScript. Product URLs, selectors, pages, steps, credentials, test data, and business scenarios belong to consumer repositories. Consumer layouts share portal/module ownership while keeping Java and TypeScript runner idioms.
 
 ## Before changing files
 
-- Read this file, `README.md`, and the relevant implementation and module documentation.
+- Read this file, `README.md`, [consumer source layout](docs/CONSUMER_SOURCE_LAYOUT.md), and the relevant implementation/module documentation.
 - Keep the Java and TypeScript implementations independent. Do not assume they share code, dependencies, release versions, or package mechanisms.
 - Treat the existing framework and consumer boundary as authoritative. Add a capability to the shared framework only when it is product-neutral; keep application behavior in consumers.
 - In Java, group source packages by automation capability inside the Maven modules and mirror them in contract tests. In TypeScript, keep the public surface in `src/index.ts`; group source by capability only when it improves navigation, and keep tests under Playwright's configured test directory.

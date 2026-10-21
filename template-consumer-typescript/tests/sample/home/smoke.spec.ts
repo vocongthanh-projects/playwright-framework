@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures';
+import { test, expect } from '../../../fixtures';
 
 test.describe('Consumer Template - Smoke Verification', () => {
   test('proves test runner, custom fixtures, and alternative dynamic locator resolve correctly', async ({

@@ -1,8 +1,8 @@
-package vn.ots.qc.consumer.template.features.sample.tests;
+package vn.ots.qc.consumer.template.portals.sample.modules.home.tests;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import vn.ots.qc.consumer.template.features.sample.pages.SamplePage;
+import vn.ots.qc.consumer.template.portals.sample.modules.home.pages.SamplePage;
 import vn.ots.qc.web.testng.BaseWebTest;
 
 import java.nio.charset.StandardCharsets;

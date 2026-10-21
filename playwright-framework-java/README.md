@@ -48,21 +48,21 @@ triển framework hoặc khi chưa cấu hình quyền đọc Registry.
 
 ### Cấu trúc dự án consumer
 
-Framework không đóng gói sẵn page, step, hay feature nào — đó là layout riêng của consumer, theo
-đúng convention test chuẩn của Maven:
+Consumer source được nhóm theo portal và module nghiệp vụ, dùng `pages/components/tests` cho web UI. Cấu trúc Maven vẫn bắt đầu ở `src/test/java`; xem [Consumer Source Layout](../docs/CONSUMER_SOURCE_LAYOUT.md) để biết glossary thống nhất với API và Appium cùng layout riêng từng stack.
 
 ```text
-your-app-repo/
-├── src/test/java/com/yourcompany/
-│   ├── pages/              # page object, extend BasePage
-│   └── tests/               # TestNG test, extend BaseWebTest
-├── src/test/resources/
-│   ├── config/
-│   │   └── application.properties   # BASE_URL, browser targets, device profiles
-│   └── features/            # *.feature, nếu dùng framework-cucumber-testng
-└── pom.xml
+your-app-repo/src/test/java/<package_root>/
+├── base/ config/ fixtures/                     # hạ tầng consumer
+├── portals/<portal>/modules/<module>/
+│   ├── pages/                                  # page objects
+│   ├── components/                             # UI components dùng lại khi cần
+│   └── tests/                                  # TestNG scenarios
+└── workflows/<workflow>/tests/                # journey đi qua nhiều module
+
+src/test/resources/features/<portal>/<module>/ # *.feature nếu dùng Cucumber
 ```
 
+Framework không đóng gói sẵn page, step, selector, hay feature nào. Product-specific source và test data vẫn thuộc consumer.
 ## Locator động (dynamic locator)
 
 Consumer định nghĩa locator logic và các phương án dự phòng theo thứ tự cố định:

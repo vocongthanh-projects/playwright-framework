@@ -1,5 +1,5 @@
 import { test as base, expect } from '@ots/playwright-core-ts';
-import { SamplePage } from './pages/sample/sample-page';
+import { SamplePage } from './pages/sample/home/sample-page';
 
 /**
  * Type-safe consumer fixtures.
