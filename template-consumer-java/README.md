@@ -6,13 +6,29 @@ Standalone Java 17/Maven/TestNG starter for a new web UI test repository. It con
 
 - `framework-testng` dependency and GitLab Maven Registry wiring.
 - Typed framework configuration and local override example.
-- Neutral `SamplePage` and an offline smoke test using a `data:` document.
+- Neutral `SamplePage` and an offline smoke test using a `data:` document, grouped under `features/sample/`.
 - Playwright browser installation profile and a CI job using a matching Playwright Java image.
 - Screenshots, HTML evidence, and traces are produced by the framework on failure according to framework configuration.
 
 ## Create a consumer repository
 
-Create an empty GitLab repository, clone it, and copy the contents of this template into its root. Then update `groupId`, `artifactId`, project Java packages (`vn.ots.qc.consumer.template`), and the display name. Keep the framework dependency coordinates under `vn.ots.qc` unchanged.
+Create an empty GitLab repository, clone it, and copy the contents of this template into its root. Then update `groupId`, `artifactId`, project Java packages (`vn.ots.qc.consumer.template`), and the display name. Keep the framework dependency coordinates under `vn.ots.qc.web` unchanged.
+
+## Consumer source layout
+
+Keep the consumer's page objects and tests together by feature, with shared configuration and test infrastructure at the package root:
+
+```text
+src/test/java/<package_root>/
+├── config/                     # consumer settings
+├── fixtures/                   # shared TestNG providers or setup
+└── features/<feature>/
+    ├── pages/                  # page objects
+    ├── components/             # reusable UI components, when needed
+    └── tests/                  # TestNG scenarios
+```
+
+For Cucumber, keep `.feature` files under `src/test/resources/features/<feature>/` and glue under the matching feature package. Split suites by behavior when that clarifies ownership; do not create a suite per endpoint.
 
 ## Install the framework dependency
 

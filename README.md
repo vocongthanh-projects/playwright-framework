@@ -81,7 +81,7 @@ Event listeners are always registered before the trigger action. Download destin
 
 ```xml
 <dependency>
-    <groupId>vn.ots.qc</groupId>
+    <groupId>vn.ots.qc.web</groupId>
     <artifactId>framework-testng</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <scope>test</scope>
@@ -104,7 +104,7 @@ Every method gets a separate `WebTestContext`. `@AfterMethod(alwaysRun = true)` 
 
 ```xml
 <dependency>
-    <groupId>vn.ots.qc</groupId>
+    <groupId>vn.ots.qc.web</groupId>
     <artifactId>framework-cucumber-testng</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <scope>test</scope>

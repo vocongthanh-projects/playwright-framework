@@ -148,15 +148,17 @@ Hàm `dynamicLocator` trong framework kết hợp các chiến lược định v
 
 ---
 
-## 7. Cấu Trúc Thư Mục Chuẩn Cho Consumer
+## 7. Cấu Trúc Thư Mục Cho Consumer
+
+TypeScript giữ cấu trúc tự nhiên của Playwright Test: `fixtures.ts` mở rộng fixture, `tests/` chứa spec và Page Object nằm theo feature. Không tạo Java-style base test class hoặc adapter module để mô phỏng TestNG.
 
 ```text
 template-consumer-typescript/
-├── pages/                 # Nơi chứa các Page Object của sản phẩm
-│   └── sample-page.ts     # Page Object mẫu kế thừa BasePage và dùng dynamicLocator thay thế
-├── tests/                 # Nơi chứa các kịch bản kiểm thử (*.spec.ts)
-│   └── smoke.spec.ts      # Smoke test mẫu chạy trên static HTML ảo (không cần mạng)
-├── fixtures.ts            # Nơi mở rộng fixture và tiêm Page Object
+├── pages/                 # Page Object của consumer, nhóm tiếp theo theo feature
+│   └── <feature>/
+├── tests/                 # Spec Playwright, nhóm tiếp theo theo feature
+│   └── <feature>/*.spec.ts
+├── fixtures.ts            # Nơi mở rộng fixture và inject Page Object
 ├── config                 # Môi trường baseline (chỉ chứa placeholder)
 ├── config-local.example   # Mẫu override local (chứa placeholder REPLACE_ME)
 ├── .gitignore             # Bỏ qua node_modules, config-local, test-results

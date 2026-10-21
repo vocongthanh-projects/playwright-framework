@@ -20,7 +20,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>vn.ots.qc</groupId>
+            <groupId>vn.ots.qc.web</groupId>
             <artifactId>framework-testng</artifactId>
             <version>${playwright.framework.version}</version>
             <scope>test</scope>

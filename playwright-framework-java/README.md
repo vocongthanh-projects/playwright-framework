@@ -1,5 +1,8 @@
 # Playwright Automation Framework (Java)
 
+
+> Maven namespace migration: this source tree now uses `vn.ots.qc.web`. Existing published artifacts under `vn.ots.qc` are not relocated; consumers must update their dependency group IDs when using a package published from this source state.
+
 Framework automation web có thể tái sử dụng cho nhiều dự án. Source chỉ chứa hạ tầng automation; URL, selector, page, step, credential, và test data thuộc về repo ứng dụng tiêu dùng.
 
 ## Module
@@ -30,7 +33,7 @@ Sau đó thêm dependency vào `pom.xml` của dự án consumer:
 
 ```xml
 <dependency>
-    <groupId>vn.ots.qc</groupId>
+    <groupId>vn.ots.qc.web</groupId>
     <artifactId>framework-testng</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <scope>test</scope>
@@ -201,10 +204,9 @@ Các lệnh trên dùng để kiểm thử local. Source pipeline OTS/FLI chỉ 
 
 ## Publishing
 
-`.gitlab-ci.yml` có `deploy` stage theo đúng pattern `framework-api`/`playwright-framework-typescript`:
+Root `.gitlab-ci.yml` chỉ compile/verify Java và kiểm tra TypeScript; nó không publish Maven artifacts. Cấu hình Registry trong consumer template chỉ áp dụng sau khi artifact đã được publish bằng quy trình phát hành riêng.
 
-- Push tag `vX.Y.Z` → bump tất cả module lên version release đó và deploy lên GitLab Maven registry.
-- Push lên `develop` → deploy version `-SNAPSHOT` hiện tại (Maven cho phép ghi đè SNAPSHOT, khác version release).
+Tag Git ghi nhận source version nhưng không tự tạo hoặc deploy Maven release. Trước khi consumer pin version, xác nhận artifact tương ứng đã xuất hiện trong GitLab Maven Package Registry.
 
 ## So sánh kiến trúc với `playwright-framework-typescript`
 

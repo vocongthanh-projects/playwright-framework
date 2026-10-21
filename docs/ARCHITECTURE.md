@@ -1,5 +1,20 @@
 # Architecture
 
+## Source organization
+
+The Java and TypeScript implementations remain independent because their execution models differ. Java uses a small set of Maven modules and capability-oriented packages (`browser`, `locator`, `interaction`, `artifact`); TestNG and Cucumber integrations stay in separate adapter modules. Framework contract tests mirror those package boundaries.
+
+TypeScript keeps the public package surface behind `src/index.ts` and extends Playwright Test through native fixtures. Its source may remain a few focused files while the API is small; split into subdirectories by public capability only when that improves navigation. Do not reproduce Java modules or lifecycle adapters mechanically in TypeScript.
+
+Consumer applications group page objects, components, and tests by product feature. Keep Playwright configuration and shared fixtures at the consumer root, and add feature subdirectories as the suite grows:
+
+```text
+Java:      features/<feature>/{pages,components,tests}/
+TypeScript: pages/<feature>/, components/<feature>/, tests/<feature>/
+```
+
+Product selectors, pages, fixtures, and assertions remain in the consumer repository.
+
 ## Dependency direction
 
 ```text
