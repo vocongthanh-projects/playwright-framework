@@ -7,6 +7,7 @@ This repository contains two separate reusable web automation implementations: J
 - Read this file, `README.md`, and the relevant implementation and module documentation.
 - Keep the Java and TypeScript implementations independent. Do not assume they share code, dependencies, release versions, or package mechanisms.
 - Treat the existing framework and consumer boundary as authoritative. Add a capability to the shared framework only when it is product-neutral; keep application behavior in consumers.
+- In Java, group source packages by automation capability inside the Maven modules and mirror them in contract tests. In TypeScript, keep the public surface in `src/index.ts`; group source by capability only when it improves navigation, and keep tests under Playwright's configured test directory.
 - Preserve existing package and artifact coordinates unless the task explicitly asks to change them.
 
 ## OTS/FLI CI boundary
